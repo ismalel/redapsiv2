@@ -1,0 +1,393 @@
+// ─── Datasource & Generator ───────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  PSYCHOLOGIST
+  ADMIN_PSYCHOLOGIST
+  CONSULTANT
+}
+
+enum TherapyStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TherapyOrigin {
+  PSYCHOLOGIST_INITIATED
+  CONSULTANT_INITIATED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  POSTPONED
+}
+
+enum TherapyRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum SessionRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum PropositionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum GoalStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum OnboardingStatus {
+  INCOMPLETE
+  COMPLETED
+}
+
+enum BillingType {
+  RECURRING
+  PER_SESSION
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  DIGITAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  WAIVED
+}
+
+enum PaymentScope {
+  THERAPY_SESSION
+  EVENT
+}
+
+enum NotificationType {
+  THERAPY_REQUEST_RECEIVED
+  THERAPY_REQUEST_ACCEPTED
+  THERAPY_REQUEST_REJECTED
+  PROPOSITION_RECEIVED
+  PROPOSITION_ACCEPTED
+  SESSION_REQUEST_RECEIVED
+  SESSION_REQUEST_ACCEPTED
+  SESSION_REQUEST_REJECTED
+  SESSION_SCHEDULED
+  SESSION_CANCELLED
+  SESSION_POSTPONED
+  SESSION_COMPLETED
+  NOTE_ADDED
+  PAYMENT_REGISTERED
+  PAYMENT_PENDING
+  GOAL_UPDATED
+  NEW_MESSAGE
+  EVENT_REGISTRATION_CONFIRMED
+  EVENT_REGISTRATION_CANCELLED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  password_hash    String
+  role             Role
+  avatar_url       String?
+  must_change_password Boolean  @default(false)
+  deleted_at       DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  psychologist_profile  PsychologistProfile?
+  consultant_profile    ConsultantProfile?
+  
+  therapies_as_psychologist Therapy[] @relation("PsychologistTherapies")
+  therapies_as_consultant   Therapy[] @relation("ConsultantTherapies")
+  
+  therapy_requests_sent     TherapyRequest[] @relation("ConsultantTherapyRequests")
+  therapy_requests_received TherapyRequest[] @relation("PsychologistTherapyRequests")
+  
+  messages_sent             Message[]
+  session_notes             SessionNote[]
+  event_registrations       EventRegistration[]
+  payments_registered       Payment[]
+  notifications             Notification[]
+  refresh_tokens            RefreshToken[]
+  session_requests_sent     SessionRequest[] @relation("ConsultantSessionRequests")
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  user_id    String
+  token      String   @unique
+  expires_at DateTime
+  revoked    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model PsychologistProfile {
+  id               String   @id @default(uuid())
+  user_id          String   @unique
+  license_number   String
+  specializations  String[]
+  bio              String?
+  session_fee      Decimal  @db.Decimal(10, 2)
+  modalities       String[]
+  languages        String[]
+  years_experience Int      @default(0)
+
+  user              User               @relation(fields: [user_id], references: [id])
+  availability_slots AvailabilitySlot[]
+}
+
+model ConsultantProfile {
+  id                String          @id @default(uuid())
+  user_id           String          @unique
+  birth_date        DateTime?
+  phone             String?
+  emergency_contact String?
+  onboarding_status OnboardingStatus @default(INCOMPLETE)
+  onboarding_step   Int              @default(1)
+  onboarding_data   Json?
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Therapy {
+  id              String        @id @default(uuid())
+  psychologist_id String
+  consultant_id   String
+  origin          TherapyOrigin
+  modality        String
+  notes           String?
+  status          TherapyStatus @default(PENDING)
+  deleted_at      DateTime?
+  created_at      DateTime      @default(now())
+
+  psychologist User @relation("PsychologistTherapies", fields: [psychologist_id], references: [id])
+  consultant   User @relation("ConsultantTherapies",   fields: [consultant_id],   references: [id])
+  
+  billing_plan     BillingPlan?
+  sessions         TherapySession[]
+  session_requests SessionRequest[]
+  propositions     ScheduleProposition[]
+  goals            Goal[]
+  messages         Message[]
+}
+
+model BillingPlan {
+  id              String      @id @default(uuid())
+  therapy_id      String      @unique
+  billing_type    BillingType
+  default_fee     Decimal     @db.Decimal(10, 2)
+  recurrence      String?
+  created_at      DateTime    @default(now())
+
+  therapy Therapy @relation(fields: [therapy_id], references: [id])
+}
+
+model TherapySession {
+  id            String        @id @default(uuid())
+  therapy_id    String
+  scheduled_at  DateTime
+  duration      Int           @default(60)
+  status        SessionStatus @default(SCHEDULED)
+  session_fee   Decimal?      @db.Decimal(10, 2)
+  cancelled_by  String?
+  cancel_reason String?
+  postponed_to  DateTime?
+  media_urls    String[]
+  created_at    DateTime      @default(now())
+
+  therapy Therapy @relation(fields: [therapy_id], references: [id])
+  notes   SessionNote[]
+  payment Payment?
+}
+
+model SessionNote {
+  id         String   @id @default(uuid())
+  session_id String
+  author_id  String
+  content    String
+  is_private Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  session TherapySession @relation(fields: [session_id], references: [id])
+  author  User           @relation(fields: [author_id], references: [id])
+}
+
+model AvailabilitySlot {
+  id             String @id @default(uuid())
+  psychologist_id String
+  day_of_week    Int    // 0-6 (Sunday-Saturday)
+  start_time     String // HH:mm
+  end_time       String // HH:mm
+
+  profile PsychologistProfile @relation(fields: [psychologist_id], references: [id])
+}
+
+model TherapyRequest {
+  id              String               @id @default(uuid())
+  psychologist_id String
+  consultant_id   String
+  message         String?
+  status          TherapyRequestStatus @default(PENDING)
+  created_at      DateTime             @default(now())
+
+  psychologist User @relation("PsychologistTherapyRequests", fields: [psychologist_id], references: [id])
+  consultant   User @relation("ConsultantTherapyRequests",   fields: [consultant_id],   references: [id])
+}
+
+model SessionRequest {
+  id            String               @id @default(uuid())
+  therapy_id    String
+  consultant_id String
+  proposed_at   DateTime
+  notes         String?
+  status        SessionRequestStatus @default(PENDING)
+  created_at    DateTime             @default(now())
+
+  therapy    Therapy @relation(fields: [therapy_id], references: [id])
+  consultant User    @relation("ConsultantSessionRequests", fields: [consultant_id], references: [id])
+}
+
+model ScheduleProposition {
+  id             String            @id @default(uuid())
+  therapy_id     String
+  proposed_slots DateTime[]
+  selected_slot  DateTime?
+  status         PropositionStatus @default(PENDING)
+  created_at     DateTime          @default(now())
+
+  therapy Therapy @relation(fields: [therapy_id], references: [id])
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  therapy_id  String
+  title       String
+  description String?
+  status      GoalStatus @default(PENDING)
+  progress    Int        @default(0) // 0-100
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  therapy Therapy             @relation(fields: [therapy_id], references: [id])
+  entries GoalProgressEntry[]
+}
+
+model GoalProgressEntry {
+  id         String   @id @default(uuid())
+  goal_id    String
+  progress   Int
+  notes      String?
+  created_at DateTime @default(now())
+
+  goal Goal @relation(fields: [goal_id], references: [id])
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  session_id      String?       @unique
+  event_id        String?
+  consultant_id   String
+  amount          Decimal       @db.Decimal(10, 2)
+  method          PaymentMethod?
+  status          PaymentStatus @default(PENDING)
+  scope           PaymentScope
+  reference       String?
+  notes           String?
+  paid_at         DateTime?
+  created_at      DateTime      @default(now())
+
+  session    TherapySession? @relation(fields: [session_id], references: [id])
+  consultant User           @relation(fields: [consultant_id], references: [id])
+  event      Event?          @relation(fields: [event_id], references: [id])
+}
+
+model Event {
+  id               String    @id @default(uuid())
+  title            String
+  description      String?
+  location         String?
+  date             DateTime
+  recurrence       String?
+  cost             Decimal   @db.Decimal(10, 2) @default(0)
+  max_participants Int?
+  deleted_at       DateTime?
+  created_at       DateTime  @default(now())
+
+  registrations EventRegistration[]
+  payments      Payment[]
+}
+
+model EventRegistration {
+  id         String             @id @default(uuid())
+  event_id   String
+  user_id    String
+  status     RegistrationStatus @default(CONFIRMED)
+  created_at DateTime           @default(now())
+
+  event Event @relation(fields: [event_id], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  therapy_id String
+  sender_id  String
+  content    String
+  media_url  String?
+  created_at DateTime @default(now())
+
+  therapy Therapy @relation(fields: [therapy_id], references: [id])
+  sender  User    @relation(fields: [sender_id], references: [id])
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  user_id    String
+  type       NotificationType
+  title      String
+  body       String
+  payload    Json?
+  read       Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
