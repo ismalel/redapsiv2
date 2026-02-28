@@ -20,7 +20,7 @@ const getOwnPsychologistProfileUseCase = new GetOwnPsychologistProfileUseCase(ps
 const updatePsychologistProfileUseCase = new UpdatePsychologistProfileUseCase(psychologistRepository);
 const setAvailabilityUseCase = new SetAvailabilityUseCase(psychologistRepository);
 
-// Public routes
+// Public list
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const availableOnly = req.query.available === 'true';
@@ -31,25 +31,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const result = await getPsychologistProfileUseCase.execute(req.params.id);
-    return sendSuccess(res, result);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get('/:id/availability', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const profile = await getPsychologistProfileUseCase.execute(req.params.id);
-    return sendSuccess(res, profile.availability_slots);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// Private routes (Psychologist only)
+// Private routes (Psychologist only) - REGISTERED BEFORE /:id
 router.get('/me/profile', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const result = await getOwnPsychologistProfileUseCase.execute(req.user!.id);
@@ -74,6 +56,25 @@ router.put('/me/availability', requireAuth, requireRole(Role.PSYCHOLOGIST), asyn
     const input = setAvailabilitySchema.parse(req.body);
     await setAvailabilityUseCase.execute(req.user!.id, input);
     return sendSuccess(res, { message: 'Availability updated successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Parameterized public routes
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await getPsychologistProfileUseCase.execute(req.params.id);
+    return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/availability', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const profile = await getPsychologistProfileUseCase.execute(req.params.id);
+    return sendSuccess(res, profile.availability_slots);
   } catch (err) {
     next(err);
   }

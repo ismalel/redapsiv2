@@ -42,6 +42,10 @@ out/
 .cache/
 .npm/
 coverage/
+backend/dist/
+backend/prisma/seed.js
+backend/prisma/seed.d.ts
+backend/prisma/seed.js.map
 
 # Logs
 logs

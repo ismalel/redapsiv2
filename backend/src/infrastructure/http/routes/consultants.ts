@@ -9,6 +9,7 @@ import { sendSuccess } from '../../../shared/response';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { Role } from '@prisma/client';
+import { hasRole } from '../../../shared/hasRole';
 import { z } from 'zod';
 
 const router = Router();
