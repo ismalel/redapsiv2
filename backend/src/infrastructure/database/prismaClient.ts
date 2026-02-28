@@ -16,14 +16,14 @@ const prisma = new PrismaClient().$extends({
         if (result && (result as any).deleted_at !== null) return null;
         return result;
       },
-      async delete({ model, args }) {
-        return (prisma as any)[model].update({
+      async delete({ args }) {
+        return (prisma as any).user.update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
-      async deleteMany({ model, args }) {
-        return (prisma as any)[model].updateMany({
+      async deleteMany({ args }) {
+        return (prisma as any).user.updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
@@ -43,14 +43,14 @@ const prisma = new PrismaClient().$extends({
         if (result && (result as any).deleted_at !== null) return null;
         return result;
       },
-      async delete({ model, args }) {
-        return (prisma as any)[model].update({
+      async delete({ args }) {
+        return (prisma as any).therapy.update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
-      async deleteMany({ model, args }) {
-        return (prisma as any)[model].updateMany({
+      async deleteMany({ args }) {
+        return (prisma as any).therapy.updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
@@ -70,14 +70,14 @@ const prisma = new PrismaClient().$extends({
         if (result && (result as any).deleted_at !== null) return null;
         return result;
       },
-      async delete({ model, args }) {
-        return (prisma as any)[model].update({
+      async delete({ args }) {
+        return (prisma as any).event.update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
-      async deleteMany({ model, args }) {
-        return (prisma as any)[model].updateMany({
+      async deleteMany({ args }) {
+        return (prisma as any).event.updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
