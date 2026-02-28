@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from './auth';
 import { ApiError } from '../../../shared/apiError';
-import { prisma } from '../database/prismaClient';
+import { prisma } from '../../database/prismaClient';
 
 export const requirePasswordChange = async (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) {
