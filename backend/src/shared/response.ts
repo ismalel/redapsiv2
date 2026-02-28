@@ -15,7 +15,7 @@ export const sendPaginated = (
   per_page: number,
   statusCode = 200
 ) => {
-  const last_page = Math.ceil(total / per_page);
+  const total_pages = Math.ceil(total / per_page);
 
   return res.status(statusCode).json({
     success: true,
@@ -24,7 +24,7 @@ export const sendPaginated = (
       total,
       page,
       per_page,
-      last_page,
+      total_pages,
     },
   });
 };

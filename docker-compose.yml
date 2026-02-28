@@ -72,7 +72,13 @@ services:
     networks:
       - redapsi_network
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   pgadmin:
     image: dpage/pgadmin4
@@ -86,7 +92,13 @@ services:
     networks:
       - redapsi_network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   redapsi_network:

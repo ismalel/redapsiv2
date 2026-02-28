@@ -197,6 +197,7 @@ model Therapy {
   status          TherapyStatus @default(PENDING)
   deleted_at      DateTime?
   created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
 
   psychologist User @relation("PsychologistTherapies", fields: [psychologist_id], references: [id])
   consultant   User @relation("ConsultantTherapies",   fields: [consultant_id],   references: [id])
@@ -215,7 +216,9 @@ model BillingPlan {
   billing_type    BillingType
   default_fee     Decimal     @db.Decimal(10, 2)
   recurrence      String?
+  notes           String?
   created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
 
   therapy Therapy @relation(fields: [therapy_id], references: [id])
 }
@@ -223,19 +226,22 @@ model BillingPlan {
 model TherapySession {
   id            String        @id @default(uuid())
   therapy_id    String
+  proposition_id String?      @unique
   scheduled_at  DateTime
   duration      Int           @default(60)
   status        SessionStatus @default(SCHEDULED)
   session_fee   Decimal?      @db.Decimal(10, 2)
   cancelled_by  String?
   cancel_reason String?
+  cancelled_at  DateTime?
   postponed_to  DateTime?
   media_urls    String[]
   created_at    DateTime      @default(now())
 
-  therapy Therapy @relation(fields: [therapy_id], references: [id])
-  notes   SessionNote[]
-  payment Payment?
+  therapy     Therapy             @relation(fields: [therapy_id], references: [id])
+  proposition ScheduleProposition? @relation(fields: [proposition_id], references: [id])
+  notes       SessionNote[]
+  payment     Payment?
 }
 
 model SessionNote {
@@ -294,7 +300,8 @@ model ScheduleProposition {
   status         PropositionStatus @default(PENDING)
   created_at     DateTime          @default(now())
 
-  therapy Therapy @relation(fields: [therapy_id], references: [id])
+  therapy Therapy         @relation(fields: [therapy_id], references: [id])
+  session TherapySession?
 }
 
 model Goal {
@@ -322,22 +329,23 @@ model GoalProgressEntry {
 }
 
 model Payment {
-  id              String        @id @default(uuid())
-  session_id      String?       @unique
-  event_id        String?
-  consultant_id   String
-  amount          Decimal       @db.Decimal(10, 2)
-  method          PaymentMethod?
-  status          PaymentStatus @default(PENDING)
-  scope           PaymentScope
-  reference       String?
-  notes           String?
-  paid_at         DateTime?
-  created_at      DateTime      @default(now())
+  id                    String        @id @default(uuid())
+  session_id            String?       @unique
+  event_registration_id String?       @unique
+  billing_plan_id       String?
+  registered_by         String
+  amount                Decimal       @db.Decimal(10, 2)
+  method                PaymentMethod
+  status                PaymentStatus @default(PENDING)
+  scope                 PaymentScope
+  reference             String?
+  notes                 String?
+  paid_at               DateTime?
+  created_at            DateTime      @default(now())
 
-  session    TherapySession? @relation(fields: [session_id], references: [id])
-  consultant User           @relation(fields: [consultant_id], references: [id])
-  event      Event?          @relation(fields: [event_id], references: [id])
+  session            TherapySession?    @relation(fields: [session_id], references: [id])
+  event_registration EventRegistration? @relation(fields: [event_registration_id], references: [id])
+  registrar          User               @relation(fields: [registered_by], references: [id])
 }
 
 model Event {
@@ -353,18 +361,18 @@ model Event {
   created_at       DateTime  @default(now())
 
   registrations EventRegistration[]
-  payments      Payment[]
 }
 
 model EventRegistration {
   id         String             @id @default(uuid())
   event_id   String
-  user_id    String
-  status     RegistrationStatus @default(CONFIRMED)
+  consultant_id String
+  status     RegistrationStatus @default(PENDING)
   created_at DateTime           @default(now())
 
-  event Event @relation(fields: [event_id], references: [id])
-  user  User  @relation(fields: [user_id], references: [id])
+  event      Event    @relation(fields: [event_id], references: [id])
+  consultant User     @relation(fields: [consultant_id], references: [id])
+  payment    Payment?
 }
 
 model Message {
