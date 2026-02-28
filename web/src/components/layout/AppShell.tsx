@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, User, LogOut, Users, Inbox } from 'lucide-react';
 
 export const AppShell: React.FC = () => {
   const { user, logout } = useAuth();
@@ -11,6 +11,9 @@ export const AppShell: React.FC = () => {
     const path = location.pathname;
     if (path.includes('/dashboard')) return 'Dashboard';
     if (path.includes('/perfil')) return 'Mi Perfil';
+    if (path.includes('/terapias/nueva')) return 'Nueva Terapia';
+    if (path.includes('/terapias')) return 'Mis Terapias';
+    if (path.includes('/solicitudes')) return 'Solicitudes';
     if (path.includes('/cambiar-contrasena')) return 'Cambiar Contraseña';
     return 'REDAPSI';
   };
@@ -42,17 +45,43 @@ export const AppShell: React.FC = () => {
           </NavLink>
 
           {(user?.role === 'PSYCHOLOGIST' || user?.role === 'ADMIN_PSYCHOLOGIST') && (
-            <NavLink 
-              to="/perfil" 
-              className={({ isActive }) => 
-                `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
-                  isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`
-              }
-            >
-              <User size={20} />
-              <span>Mi Perfil</span>
-            </NavLink>
+            <>
+              <NavLink 
+                to="/terapias" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <Users size={20} />
+                <span>Mis Terapias</span>
+              </NavLink>
+
+              <NavLink 
+                to="/solicitudes" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <Inbox size={20} />
+                <span>Solicitudes</span>
+              </NavLink>
+
+              <NavLink 
+                to="/perfil" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <User size={20} />
+                <span>Mi Perfil</span>
+              </NavLink>
+            </>
           )}
         </nav>
 
