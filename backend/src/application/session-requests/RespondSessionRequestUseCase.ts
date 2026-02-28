@@ -39,6 +39,7 @@ export class RespondSessionRequestUseCase {
           data: {
             therapy_id: request.therapy_id,
             scheduled_at: request.proposed_at,
+            duration: 60, // Default duration
             status: SessionStatus.SCHEDULED,
             session_fee: request.therapy.billing_plan?.default_fee,
           },

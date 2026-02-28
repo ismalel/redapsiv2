@@ -8,13 +8,12 @@ import { Role } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../database/prismaClient';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 const createSessionRequestUseCase = new CreateSessionRequestUseCase();
 const respondSessionRequestUseCase = new RespondSessionRequestUseCase();
 
 const createSessionRequestSchema = z.object({
-  therapy_id: z.string().uuid(),
   proposed_at: z.coerce.date(),
   notes: z.string().optional(),
 });
@@ -23,11 +22,11 @@ const respondSessionRequestSchema = z.object({
   status: z.enum(['ACCEPTED', 'REJECTED']),
 });
 
-// GET requests for a therapy
-router.get('/therapy/:therapyId', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+// GET /therapies/:id/session-requests
+router.get('/', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const requests = await prisma.sessionRequest.findMany({
-      where: { therapy_id: req.params.therapyId },
+      where: { therapy_id: req.params.id },
       orderBy: { created_at: 'desc' },
     });
     return sendSuccess(res, requests);
@@ -36,22 +35,26 @@ router.get('/therapy/:therapyId', requireAuth, async (req: AuthRequest, res: Res
   }
 });
 
-// POST new request (Consultant only)
+// POST /therapies/:id/session-requests (Consultant only)
 router.post('/', requireAuth, requireRole(Role.CONSULTANT), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const input = createSessionRequestSchema.parse(req.body);
-    const result = await createSessionRequestUseCase.execute(req.user!.id, input);
+    const { proposed_at, notes } = createSessionRequestSchema.parse(req.body);
+    const result = await createSessionRequestUseCase.execute(req.user!.id, {
+      therapy_id: req.params.id,
+      proposed_at,
+      notes
+    });
     return sendSuccess(res, result, 201);
   } catch (err) {
     next(err);
   }
 });
 
-// PATCH respond to request (Psychologist only)
-router.patch('/:id', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
+// PATCH /session-requests/:id - Independent mount
+router.patch('/:requestId', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { status } = respondSessionRequestSchema.parse(req.body);
-    const result = await respondSessionRequestUseCase.execute(req.user!.id, req.params.id, status);
+    const result = await respondSessionRequestUseCase.execute(req.user!.id, req.params.requestId, status);
     return sendSuccess(res, result);
   } catch (err) {
     next(err);

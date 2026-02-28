@@ -2,8 +2,11 @@ import React from 'react';
 import { useTherapies } from '../../hooks/useTherapies';
 import { Loader2, User, MessageCircle, Calendar, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { hasRole } from '../../utils/role-permissions';
 
 export const TerapiasListPage: React.FC = () => {
+  const { user } = useAuth();
   const { data, isLoading } = useTherapies();
   const therapies = data?.data || [];
 
@@ -15,6 +18,8 @@ export const TerapiasListPage: React.FC = () => {
     );
   }
 
+  const canCreate = hasRole(user, 'PSYCHOLOGIST');
+
   return (
     <div className="space-y-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -23,13 +28,15 @@ export const TerapiasListPage: React.FC = () => {
           <p className="text-slate-500 font-medium italic">Gestiona tus procesos terapéuticos activos y pendientes.</p>
         </div>
         
-        <Link 
-          to="/terapias/nueva"
-          className="flex items-center px-6 py-3 bg-brand-purple text-white hover:bg-brand-purple-dark rounded-2xl text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-purple/20"
-        >
-          <Plus size={18} className="mr-2" />
-          Nueva Terapia
-        </Link>
+        {canCreate && (
+          <Link 
+            to="/terapias/nueva"
+            className="flex items-center px-6 py-3 bg-brand-purple text-white hover:bg-brand-purple-dark rounded-2xl text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-purple/20"
+          >
+            <Plus size={18} className="mr-2" />
+            Nueva Terapia
+          </Link>
+        )}
       </header>
 
       {therapies.length === 0 ? (

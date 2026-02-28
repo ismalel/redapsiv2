@@ -15,4 +15,9 @@ export const queryKeys = {
     me: ['consultant', 'me'] as const,
     onboarding: (id: string) => ['consultant', id, 'onboarding'] as const,
   },
+  therapies: {
+    all: (page?: number, perPage?: number) => ['therapies', { page, perPage }] as const,
+    detail: (id: string) => ['therapy', id] as const,
+    requests: ['therapy-requests'] as const,
+  },
 };

@@ -26,6 +26,10 @@ export interface IGetTherapyUseCase {
   execute(therapyId: string, userId: string, role: string): Promise<Therapy>;
 }
 
+export interface IUpdateTherapyUseCase {
+  execute(therapyId: string, psychologistId: string, input: UpdateTherapyInput): Promise<Therapy>;
+}
+
 export interface IListTherapiesUseCase {
   execute(userId: string, role: string, page: number, perPage: number): Promise<{ data: Therapy[]; total: number }>;
 }

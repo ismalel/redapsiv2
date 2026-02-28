@@ -26,19 +26,19 @@ router.get('/unread-count', requireAuth, async (req: AuthRequest, res: Response,
   }
 });
 
-router.patch('/:id/read', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.patch('/read-all', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    await notificationService.markAsRead(req.params.id, req.user!.id);
-    return sendSuccess(res, { message: 'Notificación marcada como leída' });
+    await notificationService.markAllAsRead(req.user!.id);
+    return sendSuccess(res, { message: 'Todas las notificaciones marcadas como leídas' });
   } catch (err) {
     next(err);
   }
 });
 
-router.patch('/read-all', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.patch('/:id/read', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    await notificationService.markAllAsRead(req.user!.id);
-    return sendSuccess(res, { message: 'Todas las notificaciones marcadas como leídas' });
+    await notificationService.markAsRead(req.params.id, req.user!.id);
+    return sendSuccess(res, { message: 'Notificación marcada como leída' });
   } catch (err) {
     next(err);
   }

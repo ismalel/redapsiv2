@@ -4,9 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { therapiesApi } from '../../api/therapies.api';
 import { Loader2, ArrowLeft, User, Calendar, DollarSign, MessageCircle, Clock } from 'lucide-react';
 
+import { useAuth } from '../../context/AuthContext';
+import { hasRole } from '../../utils/role-permissions';
+
 export const TherapyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { data: therapy, isLoading, isError } = useQuery({
     queryKey: ['therapy', id],
@@ -36,6 +40,8 @@ export const TherapyDetailPage: React.FC = () => {
       </div>
     );
   }
+
+  const isPsychologist = hasRole(user, 'PSYCHOLOGIST');
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-20">
@@ -72,10 +78,12 @@ export const TherapyDetailPage: React.FC = () => {
           </div>
 
           <div className="flex gap-3">
-            <button className="flex items-center px-6 py-4 bg-brand-purple text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-purple/20 hover:bg-brand-purple-dark transition-all">
-              <MessageCircle size={18} className="mr-2" />
-              Abrir Chat
-            </button>
+            {isPsychologist && (
+              <button className="flex items-center px-6 py-4 bg-brand-purple text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-brand-purple/20 hover:bg-brand-purple-dark transition-all">
+                <MessageCircle size={18} className="mr-2" />
+                Abrir Chat
+              </button>
+            )}
           </div>
         </div>
 
@@ -113,20 +121,24 @@ export const TherapyDetailPage: React.FC = () => {
             <h3 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-widest">Próximas Sesiones</h3>
             <div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-2xl">
               <p className="text-slate-400 font-medium italic">No hay sesiones programadas aún.</p>
-              <button className="mt-4 text-brand-purple font-bold text-sm hover:underline">Proponer horarios</button>
-            </div>
-          </section>
-
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-            <h3 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-widest">Notas de la Terapia</h3>
-            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px]">
-              {therapy.notes ? (
-                <p className="text-slate-600 whitespace-pre-wrap">{therapy.notes}</p>
-              ) : (
-                <p className="text-slate-400 italic">No hay notas registradas para esta terapia.</p>
+              {isPsychologist && (
+                <button className="mt-4 text-brand-purple font-bold text-sm hover:underline">Proponer horarios</button>
               )}
             </div>
           </section>
+
+          {isPsychologist && (
+            <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+              <h3 className="text-lg font-black text-slate-800 mb-6 uppercase tracking-widest">Notas de la Terapia</h3>
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 min-h-[100px]">
+                {therapy.notes ? (
+                  <p className="text-slate-600 whitespace-pre-wrap">{therapy.notes}</p>
+                ) : (
+                  <p className="text-slate-400 italic">No hay notas registradas para esta terapia.</p>
+                )}
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="lg:col-span-1 space-y-8">

@@ -50,8 +50,6 @@ app.use('/consultants', consultantsRouter);
 app.use('/therapies', therapiesRouter);
 app.use('/therapy-requests', therapyRequestsRouter);
 app.use('/notifications', notificationsRouter);
-app.use('/propositions', propositionsRouter);
-app.use('/session-requests', sessionRequestsRouter);
 
 // Global Error Handler
 app.use(errorHandler);

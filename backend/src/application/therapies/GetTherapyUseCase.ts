@@ -23,16 +23,18 @@ export class GetTherapyUseCase implements IGetTherapyUseCase {
       throw ApiError.notFound('Terapia no encontrada', 'THERAPY_NOT_FOUND');
     }
 
-    // Authorization check
-    const isAdmin = role === Role.ADMIN || role === Role.ADMIN_PSYCHOLOGIST;
-    const isParticipant = therapy.psychologist_id === userId || therapy.consultant_id === userId;
+    // Authorization check using hasRole helper
+    const isAdmin = hasRole({ role } as any, Role.ADMIN);
+    const isPsychologist = hasRole({ role } as any, Role.PSYCHOLOGIST);
+    const isParticipant = (isPsychologist && therapy.psychologist_id === userId) || therapy.consultant_id === userId;
 
     if (!isAdmin && !isParticipant) {
       throw ApiError.forbidden('No tienes permiso para ver esta terapia', 'INSUFFICIENT_PERMISSIONS');
     }
 
-    // Severity 2 Fix: Strip notes for consultants (spec)
-    if (role === Role.CONSULTANT && therapy.consultant_id === userId) {
+    // Severity 2 Fix: Strip notes for consultants and pure admins (spec: psychologist-private)
+    const isActuallyThePsychologist = isPsychologist && therapy.psychologist_id === userId;
+    if (!isActuallyThePsychologist) {
       (therapy as any).notes = undefined;
     }
 

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, User, LogOut, Users, Inbox } from 'lucide-react';
+import { LayoutDashboard, User as UserIcon, LogOut, Users, Inbox } from 'lucide-react';
+import { hasRole } from '../../utils/role-permissions';
 
 export const AppShell: React.FC = () => {
   const { user, logout } = useAuth();
@@ -29,7 +30,7 @@ export const AppShell: React.FC = () => {
           <h1 className="text-2xl font-black italic tracking-tighter">REDAPSI</h1>
         </div>
         
-        <nav className="flex-1 p-6 space-y-3">
+        <nav className="flex-1 p-6 space-y-3 overflow-y-auto">
           <div className="px-4 py-2 text-[10px] text-white/40 uppercase tracking-[0.25em] font-black">Menú Principal</div>
           
           <NavLink 
@@ -44,20 +45,22 @@ export const AppShell: React.FC = () => {
             <span>Dashboard</span>
           </NavLink>
 
-          {(user?.role === 'PSYCHOLOGIST' || user?.role === 'ADMIN_PSYCHOLOGIST') && (
-            <>
-              <NavLink 
-                to="/terapias" 
-                className={({ isActive }) => 
-                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
-                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
-                  }`
-                }
-              >
-                <Users size={20} />
-                <span>Mis Terapias</span>
-              </NavLink>
+          {(hasRole(user, 'PSYCHOLOGIST') || hasRole(user, 'ADMIN')) && (
+            <NavLink 
+              to="/terapias" 
+              className={({ isActive }) => 
+                `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                  isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                }`
+              }
+            >
+              <Users size={20} />
+              <span>Mis Terapias</span>
+            </NavLink>
+          )}
 
+          {hasRole(user, 'PSYCHOLOGIST') && (
+            <>
               <NavLink 
                 to="/solicitudes" 
                 className={({ isActive }) => 
@@ -78,7 +81,7 @@ export const AppShell: React.FC = () => {
                   }`
                 }
               >
-                <User size={20} />
+                <UserIcon size={20} />
                 <span>Mi Perfil</span>
               </NavLink>
             </>

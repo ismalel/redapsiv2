@@ -1,17 +1,21 @@
-import { Router, Response, NextFunction, Request } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { CreateTherapyUseCase } from '../../../application/therapies/CreateTherapyUseCase';
 import { GetTherapyUseCase } from '../../../application/therapies/GetTherapyUseCase';
+import { UpdateTherapyUseCase } from '../../../application/therapies/UpdateTherapyUseCase';
 import { ListTherapiesUseCase } from '../../../application/therapies/ListTherapiesUseCase';
 import { sendSuccess, sendPaginated } from '../../../shared/response';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
-import { Role, BillingType } from '@prisma/client';
+import { Role, BillingType, TherapyStatus } from '@prisma/client';
 import { z } from 'zod';
+import { propositionsRouter } from './propositions';
+import { sessionRequestsRouter } from './session-requests';
 
 const router = Router();
 
 const createTherapyUseCase = new CreateTherapyUseCase();
 const getTherapyUseCase = new GetTherapyUseCase();
+const updateTherapyUseCase = new UpdateTherapyUseCase();
 const listTherapiesUseCase = new ListTherapiesUseCase();
 
 const createTherapySchema = z.object({
@@ -24,6 +28,12 @@ const createTherapySchema = z.object({
     default_fee: z.number().min(0),
     recurrence: z.string().optional(),
   }),
+});
+
+const updateTherapySchema = z.object({
+  modality: z.string().optional(),
+  notes: z.string().optional(),
+  status: z.nativeEnum(TherapyStatus).optional(),
 });
 
 router.post('/', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -55,6 +65,20 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response, next: Ne
     next(err);
   }
 });
+
+router.patch('/:id', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const input = updateTherapySchema.parse(req.body);
+    const result = await updateTherapyUseCase.execute(req.params.id, req.user!.id, input);
+    return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Nest sub-resources
+router.use('/:id/propositions', propositionsRouter);
+router.use('/:id/session-requests', sessionRequestsRouter);
 
 export default router;
 export { router as therapiesRouter };

@@ -1,6 +1,7 @@
 import { Therapy, Role } from '@prisma/client';
 import { prisma } from '../../infrastructure/database/prismaClient';
 import { IListTherapiesUseCase } from './therapies.use-cases';
+import { hasRole } from '../../shared/hasRole';
 
 export class ListTherapiesUseCase implements IListTherapiesUseCase {
   async execute(
@@ -13,13 +14,17 @@ export class ListTherapiesUseCase implements IListTherapiesUseCase {
     
     let where: any = {};
     
-    if (role === Role.ADMIN) {
-      // Admins see all non-deleted therapies
+    const isAdmin = hasRole({ role } as any, Role.ADMIN);
+    const isPsychologist = hasRole({ role } as any, Role.PSYCHOLOGIST);
+    const isConsultant = hasRole({ role } as any, Role.CONSULTANT);
+
+    if (isAdmin) {
+      // Admins see all
       where = {};
-    } else if (role === Role.PSYCHOLOGIST || role === Role.ADMIN_PSYCHOLOGIST) {
+    } else if (isPsychologist) {
       // Psychologists see their own
       where = { psychologist_id: userId };
-    } else if (role === Role.CONSULTANT) {
+    } else if (isConsultant) {
       // Consultants see their own
       where = { consultant_id: userId };
     }
@@ -43,12 +48,13 @@ export class ListTherapiesUseCase implements IListTherapiesUseCase {
       prisma.therapy.count({ where }),
     ]);
 
-    // Severity 2 Fix: Strip notes for consultants
-    if (role === Role.CONSULTANT) {
-      therapies.forEach(t => {
+    // Strip notes for anyone who is not the psychologist of the therapy
+    therapies.forEach(t => {
+      const isThePsychologist = isPsychologist && t.psychologist_id === userId;
+      if (!isThePsychologist) {
         (t as any).notes = undefined;
-      });
-    }
+      }
+    });
 
     return { data: therapies, total };
   }

@@ -8,7 +8,7 @@ import { Role } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../database/prismaClient';
 
-const router = Router();
+const router = Router({ mergeParams: true }); // Enable mergeParams to access therapyId from parent
 
 const createPropositionUseCase = new CreatePropositionUseCase();
 const selectPropositionSlotUseCase = new SelectPropositionSlotUseCase();
@@ -21,11 +21,11 @@ const selectSlotSchema = z.object({
   selected_slot: z.coerce.date(),
 });
 
-// GET propositions for a therapy
-router.get('/therapy/:therapyId', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+// GET /therapies/:id/propositions
+router.get('/', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const propositions = await prisma.scheduleProposition.findMany({
-      where: { therapy_id: req.params.therapyId },
+      where: { therapy_id: req.params.id }, // 'id' from therapiesRouter
       orderBy: { created_at: 'desc' },
     });
     return sendSuccess(res, propositions);
@@ -34,12 +34,12 @@ router.get('/therapy/:therapyId', requireAuth, async (req: AuthRequest, res: Res
   }
 });
 
-// POST new proposition (Psychologist only)
-router.post('/therapy/:therapyId', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
+// POST /therapies/:id/propositions (Psychologist only)
+router.post('/', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { proposed_slots } = createPropositionSchema.parse(req.body);
     const result = await createPropositionUseCase.execute(req.user!.id, {
-      therapy_id: req.params.therapyId,
+      therapy_id: req.params.id,
       proposed_slots
     });
     return sendSuccess(res, result, 201);
@@ -48,11 +48,12 @@ router.post('/therapy/:therapyId', requireAuth, requireRole(Role.PSYCHOLOGIST), 
   }
 });
 
-// PATCH select slot (Consultant only)
-router.patch('/:id/select', requireAuth, requireRole(Role.CONSULTANT), async (req: AuthRequest, res: Response, next: NextFunction) => {
+// PATCH /propositions/:id - Mounting logic will handle this
+// Actually, I'll keep the select logic separate or handle it via mount
+router.patch('/:propositionId/select', requireAuth, requireRole(Role.CONSULTANT), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { selected_slot } = selectSlotSchema.parse(req.body);
-    const result = await selectPropositionSlotUseCase.execute(req.user!.id, req.params.id, selected_slot);
+    const result = await selectPropositionSlotUseCase.execute(req.user!.id, req.params.propositionId, selected_slot);
     return sendSuccess(res, result);
   } catch (err) {
     next(err);

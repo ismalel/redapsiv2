@@ -53,6 +53,7 @@ export class SelectPropositionSlotUseCase {
           therapy_id: proposition.therapy_id,
           proposition_id: proposition.id,
           scheduled_at: selectedSlot,
+          duration: 60, // Default duration as per schema requirement or business rule
           status: SessionStatus.SCHEDULED,
           session_fee: proposition.therapy.billing_plan?.default_fee,
         },

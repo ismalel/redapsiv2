@@ -24,16 +24,16 @@ export class CreateTherapyUseCase implements ICreateTherapyUseCase {
           throw ApiError.conflict('El email pertenece a un usuario que no es consultante', 'INVALID_CONSULTANT_EMAIL');
         }
 
-        // Check if consultant already has an ACTIVE or PENDING therapy
-        const activeOrPendingTherapy = await tx.therapy.findFirst({
+        // Check if consultant already has an ACTIVE therapy
+        const activeTherapy = await tx.therapy.findFirst({
           where: {
             consultant_id: consultantUser.id,
-            status: { in: [TherapyStatus.ACTIVE, TherapyStatus.PENDING] },
+            status: TherapyStatus.ACTIVE,
           },
         });
 
-        if (activeOrPendingTherapy) {
-          throw ApiError.conflict('La consultante ya tiene una terapia activa o pendiente', 'CONSULTANT_HAS_ACTIVE_THERAPY');
+        if (activeTherapy) {
+          throw ApiError.conflict('La consultante ya tiene una terapia activa', 'CONSULTANT_HAS_ACTIVE_THERAPY');
         }
       } else {
         // Create new consultant user with temp password
