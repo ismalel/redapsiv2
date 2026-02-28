@@ -1,6 +1,8 @@
 import { IConsultantRepository } from '../../domain/repositories/IConsultantRepository';
 import { ISubmitOnboardingStepUseCase } from './consultants.use-cases';
 import { ApiError } from '../../shared/apiError';
+import { prisma } from '../../infrastructure/database/prismaClient';
+import { TherapyStatus } from '@prisma/client';
 
 export class SubmitOnboardingStepUseCase implements ISubmitOnboardingStepUseCase {
   constructor(private consultantRepository: IConsultantRepository) {}
@@ -16,6 +18,22 @@ export class SubmitOnboardingStepUseCase implements ISubmitOnboardingStepUseCase
     }
 
     const isComplete = step === 6;
-    await this.consultantRepository.updateOnboardingStep(userId, step, data, isComplete);
+    
+    await prisma.$transaction(async (tx) => {
+      await this.consultantRepository.updateOnboardingStep(userId, step, data, isComplete);
+
+      // If onboarding is complete, activate any PENDING therapy for this consultant
+      if (isComplete) {
+        await tx.therapy.updateMany({
+          where: {
+            consultant_id: userId,
+            status: TherapyStatus.PENDING
+          },
+          data: {
+            status: TherapyStatus.ACTIVE
+          }
+        });
+      }
+    });
   }
 }
