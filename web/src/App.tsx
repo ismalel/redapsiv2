@@ -67,7 +67,7 @@ function App() {
               } />
 
               <Route path="terapias" element={
-                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST']}>
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST', 'ADMIN']}>
                   <TerapiasListPage />
                 </RoleGuard>
               } />

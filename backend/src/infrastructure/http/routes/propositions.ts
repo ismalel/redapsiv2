@@ -1,16 +1,21 @@
 import { Router, Response, NextFunction } from 'express';
 import { CreatePropositionUseCase } from '../../../application/propositions/CreatePropositionUseCase';
 import { SelectPropositionSlotUseCase } from '../../../application/propositions/SelectPropositionSlotUseCase';
+import { ListPropositionsUseCase } from '../../../application/propositions/ListPropositionsUseCase';
 import { sendSuccess } from '../../../shared/response';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { Role } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../database/prismaClient';
+import { hasRole } from '../../../shared/hasRole';
+import { ApiError } from '../../../shared/apiError';
 
-const router = Router({ mergeParams: true }); // Enable mergeParams to access therapyId from parent
+// This router handles nested routes: /therapies/:id/propositions
+const nestedRouter = Router({ mergeParams: true });
 
 const createPropositionUseCase = new CreatePropositionUseCase();
+const listPropositionsUseCase = new ListPropositionsUseCase();
 const selectPropositionSlotUseCase = new SelectPropositionSlotUseCase();
 
 const createPropositionSchema = z.object({
@@ -22,20 +27,28 @@ const selectSlotSchema = z.object({
 });
 
 // GET /therapies/:id/propositions
-router.get('/', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+nestedRouter.get('/', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const propositions = await prisma.scheduleProposition.findMany({
-      where: { therapy_id: req.params.id }, // 'id' from therapiesRouter
-      orderBy: { created_at: 'desc' },
-    });
-    return sendSuccess(res, propositions);
+    // Severity 2 Fix: Authorization check (B12)
+    const therapy = await prisma.therapy.findUnique({ where: { id: req.params.id } });
+    if (!therapy) throw ApiError.notFound('Terapia no encontrada');
+    
+    const isParticipant = therapy.psychologist_id === req.user!.id || therapy.consultant_id === req.user!.id;
+    const isAdmin = hasRole(req.user!, Role.ADMIN);
+    
+    if (!isParticipant && !isAdmin) {
+      throw ApiError.forbidden('No tienes permiso para ver estas propuestas');
+    }
+
+    const result = await listPropositionsUseCase.execute(req.params.id);
+    return sendSuccess(res, result);
   } catch (err) {
     next(err);
   }
 });
 
 // POST /therapies/:id/propositions (Psychologist only)
-router.post('/', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
+nestedRouter.post('/', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { proposed_slots } = createPropositionSchema.parse(req.body);
     const result = await createPropositionUseCase.execute(req.user!.id, {
@@ -48,17 +61,18 @@ router.post('/', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRe
   }
 });
 
-// PATCH /propositions/:id - Mounting logic will handle this
-// Actually, I'll keep the select logic separate or handle it via mount
-router.patch('/:propositionId/select', requireAuth, requireRole(Role.CONSULTANT), async (req: AuthRequest, res: Response, next: NextFunction) => {
+// This router handles top-level routes: /propositions
+const topLevelRouter = Router();
+
+// PATCH /propositions/:id (Consultant only) - Fixed to match spec (B3)
+topLevelRouter.patch('/:id', requireAuth, requireRole(Role.CONSULTANT), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { selected_slot } = selectSlotSchema.parse(req.body);
-    const result = await selectPropositionSlotUseCase.execute(req.user!.id, req.params.propositionId, selected_slot);
+    const result = await selectPropositionSlotUseCase.execute(req.user!.id, req.params.id, selected_slot);
     return sendSuccess(res, result);
   } catch (err) {
     next(err);
   }
 });
 
-export default router;
-export { router as propositionsRouter };
+export { nestedRouter as propositionsNestedRouter, topLevelRouter as propositionsRouter };

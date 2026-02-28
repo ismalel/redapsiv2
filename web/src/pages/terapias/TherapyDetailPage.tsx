@@ -2,8 +2,8 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { therapiesApi } from '../../api/therapies.api';
+import { queryKeys } from '../../utils/query-keys';
 import { Loader2, ArrowLeft, User, Calendar, DollarSign, MessageCircle, Clock } from 'lucide-react';
-
 import { useAuth } from '../../context/AuthContext';
 import { hasRole } from '../../utils/role-permissions';
 
@@ -13,7 +13,7 @@ export const TherapyDetailPage: React.FC = () => {
   const { user } = useAuth();
 
   const { data: therapy, isLoading, isError } = useQuery({
-    queryKey: ['therapy', id],
+    queryKey: queryKeys.therapies.detail(id!),
     queryFn: () => therapiesApi.get(id!),
     enabled: !!id,
   });

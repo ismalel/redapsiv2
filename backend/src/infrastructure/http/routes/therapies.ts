@@ -8,8 +8,8 @@ import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { Role, BillingType, TherapyStatus } from '@prisma/client';
 import { z } from 'zod';
-import { propositionsRouter } from './propositions';
-import { sessionRequestsRouter } from './session-requests';
+import { propositionsNestedRouter } from './propositions';
+import { sessionRequestsNestedRouter } from './session-requests';
 
 const router = Router();
 
@@ -76,9 +76,9 @@ router.patch('/:id', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: Au
   }
 });
 
-// Nest sub-resources
-router.use('/:id/propositions', propositionsRouter);
-router.use('/:id/session-requests', sessionRequestsRouter);
+// Nest sub-resources under /therapies/:id
+router.use('/:id/propositions', propositionsNestedRouter);
+router.use('/:id/session-requests', sessionRequestsNestedRouter);
 
 export default router;
 export { router as therapiesRouter };

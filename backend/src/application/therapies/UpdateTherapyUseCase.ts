@@ -1,4 +1,5 @@
-import { Therapy, prisma } from '../../infrastructure/database/prismaClient';
+import { Therapy } from '@prisma/client';
+import { prisma } from '../../infrastructure/database/prismaClient';
 import { IUpdateTherapyUseCase, UpdateTherapyInput } from './therapies.use-cases';
 import { ApiError } from '../../shared/apiError';
 

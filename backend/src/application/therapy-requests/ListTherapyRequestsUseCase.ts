@@ -1,4 +1,4 @@
-import { TherapyRequest, Role, prisma } from '@prisma/client';
+import { TherapyRequest, Role } from '@prisma/client';
 import { prisma as prismaInstance } from '../../infrastructure/database/prismaClient';
 import { hasRole } from '../../shared/hasRole';
 

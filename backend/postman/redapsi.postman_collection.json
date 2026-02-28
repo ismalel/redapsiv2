@@ -234,6 +234,31 @@
 					"response": []
 				},
 				{
+					"name": "Get Availability (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/psychologists/:id/availability",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"psychologists",
+								":id",
+								"availability"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "PSY_ID_HERE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get My Profile",
 					"request": {
 						"method": "GET",
@@ -392,7 +417,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"birth_date\": \"1995-10-10\",\n    \"reason\": \"Busco terapia feminista por temas de ansiedad.\"\n}",
+							"raw": "{\n    \"data\": {\n        \"birth_date\": \"1995-10-10\",\n        \"reason\": \"Busco terapia feminista por temas de ansiedad.\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -487,6 +512,39 @@
 					"request": {
 						"method": "GET",
 						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Therapy",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"modality\": \"in_person\",\n    \"notes\": \"Actualización de notas.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/therapies/:id",
 							"host": [
@@ -607,14 +665,39 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/propositions/therapy/:therapyId",
+							"raw": "{{base_url}}/therapies/:therapyId/propositions",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"propositions",
-								"therapy",
-								":therapyId"
+								"therapies",
+								":therapyId",
+								"propositions"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Propositions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies/:therapyId/propositions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":therapyId",
+								"propositions"
 							],
 							"variable": [
 								{
@@ -641,14 +724,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/propositions/:id/select",
+							"raw": "{{base_url}}/propositions/:id",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"propositions",
-								":id",
-								"select"
+								":id"
 							],
 							"variable": [
 								{
@@ -667,7 +749,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"therapy_id\": \"THERAPY_ID\",\n    \"proposed_at\": \"2026-03-12T09:00:00Z\",\n    \"notes\": \"Me gustaría este horario por favor.\"\n}",
+							"raw": "{\n    \"proposed_at\": \"2026-03-12T09:00:00Z\",\n    \"notes\": \"Me gustaría este horario por favor.\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -675,12 +757,45 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/session-requests",
+							"raw": "{{base_url}}/therapies/:therapyId/session-requests",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
+								"therapies",
+								":therapyId",
 								"session-requests"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies/:therapyId/session-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":therapyId",
+								"session-requests"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
 							]
 						}
 					},
