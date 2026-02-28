@@ -116,6 +116,11 @@ enum NotificationType {
   EVENT_REGISTRATION_CANCELLED
 }
 
+enum AvailabilityType {
+  AVAILABLE
+  BLOCKED
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model User {
@@ -142,7 +147,7 @@ model User {
   messages_sent             Message[]
   session_notes             SessionNote[]
   event_registrations       EventRegistration[]
-  payments_registered       Payment[]
+  payments_registered       Payment[]        @relation("RegisteredBy")
   notifications             Notification[]
   refresh_tokens            RefreshToken[]
   session_requests_sent     SessionRequest[] @relation("ConsultantSessionRequests")
@@ -264,6 +269,7 @@ model AvailabilitySlot {
   day_of_week             Int    // 0-6 (Sunday-Saturday)
   start_time              String // HH:mm
   end_time                String // HH:mm
+  type                    AvailabilityType @default(AVAILABLE)
 
   profile PsychologistProfile @relation(fields: [psychologist_profile_id], references: [id])
 }
@@ -347,7 +353,7 @@ model Payment {
   session            TherapySession?    @relation(fields: [session_id], references: [id])
   event_registration EventRegistration? @relation(fields: [event_registration_id], references: [id])
   billing_plan       BillingPlan?       @relation(fields: [billing_plan_id], references: [id])
-  registrar          User               @relation(fields: [registered_by], references: [id])
+  registrar          User               @relation("RegisteredBy", fields: [registered_by], references: [id])
 }
 
 model Event {
