@@ -13,7 +13,9 @@ Thumbs.db
 .gemini/
 .claude/
 .cursor/
+.cursorrules
 .aider/
+.aider*
 .openai/
 .copilot/
 .codeium/
@@ -22,6 +24,15 @@ Thumbs.db
 .supermaven/
 ai_logs/
 agent_outputs/
+.aider.conf.yml
+.aider.tags.cache.v3
+
+# Agent Instruction Files (Local Only)
+CLAUDE.md
+GEMINI.md
+DEV.md
+PLAN.md
+therapy_platform_migration_guide.txt
 
 # Development folders (common)
 node_modules/
@@ -30,6 +41,7 @@ build/
 out/
 .cache/
 .npm/
+coverage/
 
 # Logs
 logs
