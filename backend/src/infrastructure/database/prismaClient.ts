@@ -12,20 +12,18 @@ const prisma = new PrismaClient().$extends({
         return query(args);
       },
       async findUnique({ args, query }) {
-        // findUnique doesn't support additional filters in some cases, 
-        // but we want to ensure we don't find deleted ones
         const result = await query(args);
         if (result && (result as any).deleted_at !== null) return null;
         return result;
       },
-      async delete({ args, query }) {
-        return (prisma as any).user.update({
+      async delete({ model, args }) {
+        return (prisma as any)[model].update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
-      async deleteMany({ args, query }) {
-        return (prisma as any).user.updateMany({
+      async deleteMany({ model, args }) {
+        return (prisma as any)[model].updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
@@ -45,14 +43,14 @@ const prisma = new PrismaClient().$extends({
         if (result && (result as any).deleted_at !== null) return null;
         return result;
       },
-      async delete({ args, query }) {
-        return (prisma as any).therapy.update({
+      async delete({ model, args }) {
+        return (prisma as any)[model].update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
-      async deleteMany({ args, query }) {
-        return (prisma as any).therapy.updateMany({
+      async deleteMany({ model, args }) {
+        return (prisma as any)[model].updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
@@ -72,14 +70,14 @@ const prisma = new PrismaClient().$extends({
         if (result && (result as any).deleted_at !== null) return null;
         return result;
       },
-      async delete({ args, query }) {
-        return (prisma as any).event.update({
+      async delete({ model, args }) {
+        return (prisma as any)[model].update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
-      async deleteMany({ args, query }) {
-        return (prisma as any).event.updateMany({
+      async deleteMany({ model, args }) {
+        return (prisma as any)[model].updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });

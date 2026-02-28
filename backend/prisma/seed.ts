@@ -83,15 +83,18 @@ async function main() {
   });
 
   // Psychologist Availability (Mon-Fri 9-18h)
-  const psyProfiles = [psy1Profile, psy2Profile];
-  for (const profile of psyProfiles) {
+  const profiles = [psy1Profile, psy2Profile];
+  for (const profile of profiles) {
     for (let day = 1; day <= 5; day++) {
-      await prisma.availabilitySlot.createMany({
-        data: [
-          { psychologist_id: profile.id, day_of_week: day, start_time: '09:00', end_time: '18:00' }
-        ],
-        skipDuplicates: true
+      // Find if slot exists to ensure idempotency
+      const existingSlot = await prisma.availabilitySlot.findFirst({
+        where: { psychologist_profile_id: profile.id, day_of_week: day }
       });
+      if (!existingSlot) {
+        await prisma.availabilitySlot.create({
+          data: { psychologist_profile_id: profile.id, day_of_week: day, start_time: '09:00', end_time: '18:00' }
+        });
+      }
     }
   }
 
@@ -185,7 +188,7 @@ async function main() {
 
   // 3. Therapy Request
   await prisma.therapyRequest.upsert({
-    where: { id: 'seed-request-1' }, // Hardcoding ID for seed idempotency
+    where: { id: 'seed-request-1' }, 
     update: {},
     create: {
       id: 'seed-request-1',
@@ -290,26 +293,49 @@ async function main() {
     }
   });
 
-  await prisma.goalProgressEntry.createMany({
-    data: [
-      { goal_id: goal1.id, progress: 20, notes: 'Inicio de tratamiento', created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
-      { goal_id: goal1.id, progress: 40, notes: 'Mejora en técnicas de respiración', created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
-    ],
-    skipDuplicates: true
+  const goal2 = await prisma.goal.upsert({
+    where: { id: 'seed-goal-2' },
+    update: {},
+    create: {
+      id: 'seed-goal-2',
+      therapy_id: therapy1.id,
+      title: 'Mejorar asertividad',
+      description: 'Aprender a establecer límites claros en relaciones personales.',
+      status: 'PENDING',
+      progress: 10
+    }
   });
 
-  // 8. Notifications
+  // Goal Progress Entries (Idempotent)
+  const entries = [
+    { id: 'goal-entry-1', goal_id: goal1.id, progress: 20, notes: 'Inicio de tratamiento', created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
+    { id: 'goal-entry-2', goal_id: goal1.id, progress: 40, notes: 'Mejora en técnicas de respiración', created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+    { id: 'goal-entry-3', goal_id: goal2.id, progress: 0, notes: 'Establecimiento de línea base', created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
+    { id: 'goal-entry-4', goal_id: goal2.id, progress: 10, notes: 'Primeros ejercicios de asertividad', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) }
+  ];
+
+  for (const entry of entries) {
+    await prisma.goalProgressEntry.upsert({
+      where: { id: entry.id },
+      update: {},
+      create: entry
+    });
+  }
+
+  // 8. Notifications (Idempotent)
   const notifications = [
-    { type: NotificationType.SESSION_SCHEDULED, title: 'Sesión Programada', body: 'Tu próxima sesión ha sido confirmada.', read: false },
-    { type: NotificationType.PAYMENT_REGISTERED, title: 'Pago Registrado', body: 'Se ha registrado tu pago de $500.', read: true },
-    { type: NotificationType.GOAL_UPDATED, title: 'Objetivo Actualizado', body: 'Tu progreso en "Reducir ansiedad" ha sido actualizado.', read: false },
-    { type: NotificationType.NEW_MESSAGE, title: 'Nuevo Mensaje', body: 'Tu psicóloga te ha enviado un mensaje.', read: false },
-    { type: NotificationType.PROPOSITION_RECEIVED, title: 'Nuevos horarios propuestos', body: 'Revisa las opciones para tu próxima sesión.', read: false }
+    { id: 'notif-1', type: NotificationType.SESSION_SCHEDULED, title: 'Sesión Programada', body: 'Tu próxima sesión ha sido confirmada.', read: false },
+    { id: 'notif-2', type: NotificationType.PAYMENT_REGISTERED, title: 'Pago Registrado', body: 'Se ha registrado tu pago de $500.', read: true },
+    { id: 'notif-3', type: NotificationType.GOAL_UPDATED, title: 'Objetivo Actualizado', body: 'Tu progreso en "Reducir ansiedad" ha sido actualizado.', read: false },
+    { id: 'notif-4', type: NotificationType.NEW_MESSAGE, title: 'Nuevo Mensaje', body: 'Tu psicóloga te ha enviado un mensaje.', read: false },
+    { id: 'notif-5', type: NotificationType.PROPOSITION_RECEIVED, title: 'Nuevos horarios propuestos', body: 'Revisa las opciones para tu próxima sesión.', read: false }
   ];
 
   for (const n of notifications) {
-    await prisma.notification.create({
-      data: {
+    await prisma.notification.upsert({
+      where: { id: n.id },
+      update: {},
+      create: {
         user_id: consultant1User.id,
         ...n
       }

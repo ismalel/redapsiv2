@@ -220,7 +220,8 @@ model BillingPlan {
   created_at      DateTime    @default(now())
   updated_at      DateTime    @updatedAt
 
-  therapy Therapy @relation(fields: [therapy_id], references: [id])
+  therapy  Therapy   @relation(fields: [therapy_id], references: [id])
+  payments Payment[]
 }
 
 model TherapySession {
@@ -258,13 +259,13 @@ model SessionNote {
 }
 
 model AvailabilitySlot {
-  id             String @id @default(uuid())
-  psychologist_id String
-  day_of_week    Int    // 0-6 (Sunday-Saturday)
-  start_time     String // HH:mm
-  end_time       String // HH:mm
+  id                      String @id @default(uuid())
+  psychologist_profile_id String
+  day_of_week             Int    // 0-6 (Sunday-Saturday)
+  start_time              String // HH:mm
+  end_time                String // HH:mm
 
-  profile PsychologistProfile @relation(fields: [psychologist_id], references: [id])
+  profile PsychologistProfile @relation(fields: [psychologist_profile_id], references: [id])
 }
 
 model TherapyRequest {
@@ -345,6 +346,7 @@ model Payment {
 
   session            TherapySession?    @relation(fields: [session_id], references: [id])
   event_registration EventRegistration? @relation(fields: [event_registration_id], references: [id])
+  billing_plan       BillingPlan?       @relation(fields: [billing_plan_id], references: [id])
   registrar          User               @relation(fields: [registered_by], references: [id])
 }
 
