@@ -8,6 +8,7 @@ export interface User {
   name: string;
   role: string;
   must_change_password: boolean;
+  avatar_url?: string | null;
 }
 
 interface AuthContextType {

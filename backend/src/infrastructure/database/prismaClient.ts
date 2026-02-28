@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient().$extends({
+const basePrisma = new PrismaClient();
+
+const prisma = basePrisma.$extends({
   query: {
     user: {
       async findMany({ args, query }) {
@@ -17,13 +19,13 @@ const prisma = new PrismaClient().$extends({
         return result;
       },
       async delete({ args }) {
-        return (prisma as any).user.update({
+        return (basePrisma as any).user.update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
       async deleteMany({ args }) {
-        return (prisma as any).user.updateMany({
+        return (basePrisma as any).user.updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
@@ -44,13 +46,13 @@ const prisma = new PrismaClient().$extends({
         return result;
       },
       async delete({ args }) {
-        return (prisma as any).therapy.update({
+        return (basePrisma as any).therapy.update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
       async deleteMany({ args }) {
-        return (prisma as any).therapy.updateMany({
+        return (basePrisma as any).therapy.updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });
@@ -71,13 +73,13 @@ const prisma = new PrismaClient().$extends({
         return result;
       },
       async delete({ args }) {
-        return (prisma as any).event.update({
+        return (basePrisma as any).event.update({
           where: args.where,
           data: { deleted_at: new Date() },
         });
       },
       async deleteMany({ args }) {
-        return (prisma as any).event.updateMany({
+        return (basePrisma as any).event.updateMany({
           where: args.where,
           data: { deleted_at: new Date() },
         });

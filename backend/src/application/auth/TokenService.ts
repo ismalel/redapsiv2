@@ -10,13 +10,13 @@ export class TokenService {
     const accessToken = jwt.sign(
       { sub: userId, role },
       process.env.JWT_SECRET!,
-      { expiresIn: accessTokenExpiresIn }
+      { expiresIn: accessTokenExpiresIn } as any
     );
 
     const refreshToken = jwt.sign(
       { sub: userId },
       process.env.JWT_REFRESH_SECRET!,
-      { expiresIn: refreshTokenExpiresIn }
+      { expiresIn: refreshTokenExpiresIn } as any
     );
 
     // Parse seconds from expiresIn string (simple version for 15m default)

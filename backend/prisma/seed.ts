@@ -107,11 +107,11 @@ async function main() {
     for (let day = 1; day <= 5; day++) {
       // Find if slot exists to ensure idempotency
       const existingSlot = await prisma.availabilitySlot.findFirst({
-        where: { psychologist_profile_id: profile.id, day_of_week: day }
+        where: { psychologist_id: profile.id, day_of_week: day }
       });
       if (!existingSlot) {
         await prisma.availabilitySlot.create({
-          data: { psychologist_profile_id: profile.id, day_of_week: day, start_time: '09:00', end_time: '18:00' }
+          data: { psychologist_id: profile.id, day_of_week: day, start_time: '09:00', end_time: '18:00' }
         });
       }
     }
@@ -253,7 +253,7 @@ async function main() {
       status: SessionStatus.CANCELLED,
       session_fee: 500.00,
       cancelled_by: psy1User.id,
-      cancelled_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      // cancelled_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       cancel_reason: 'Emergencia de la psicóloga',
     }
   });
@@ -289,7 +289,7 @@ async function main() {
     update: {},
     create: {
       session_id: completedSession.id,
-      registered_by: psy1User.id,
+      consultant_id: consultant1User.id,
       amount: 500.00,
       method: 'CASH',
       status: 'PAID',

@@ -6,12 +6,16 @@ import path from 'path';
 import { healthRouter } from './routes/health';
 import { authRouter } from './routes/auth';
 import { uploadRouter } from './routes/upload';
+import { psychologistsRouter } from './routes/psychologists';
+import { consultantsRouter } from './routes/consultants';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
 // Standard middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'];
 app.use(cors({
@@ -36,6 +40,8 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/health', healthRouter);
 app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);
+app.use('/psychologists', psychologistsRouter);
+app.use('/consultants', consultantsRouter);
 
 // Global Error Handler
 app.use(errorHandler);

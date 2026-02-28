@@ -9,6 +9,7 @@ import { AppShell } from './components/layout/AppShell';
 // Pages - Lazy loading will be implemented as they grow
 import { LoginPage } from './pages/auth/LoginPage';
 import { ChangePasswordPage } from './pages/auth/ChangePasswordPage';
+import { PsychologistProfilePage } from './pages/perfil/PsychologistProfilePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +25,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             {/* Public Routes */}
             <Route path="/iniciar-sesion" element={
@@ -53,6 +54,12 @@ function App() {
                 <AuthGuard>
                   <ChangePasswordPage />
                 </AuthGuard>
+              } />
+
+              <Route path="perfil" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST']}>
+                  <PsychologistProfilePage />
+                </RoleGuard>
               } />
             </Route>
 

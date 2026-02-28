@@ -142,7 +142,7 @@ model User {
   messages_sent             Message[]
   session_notes             SessionNote[]
   event_registrations       EventRegistration[]
-  payments_registered       Payment[]
+  payments                  Payment[]
   notifications             Notification[]
   refresh_tokens            RefreshToken[]
   session_requests_sent     SessionRequest[] @relation("ConsultantSessionRequests")
@@ -197,7 +197,6 @@ model Therapy {
   status          TherapyStatus @default(PENDING)
   deleted_at      DateTime?
   created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
 
   psychologist User @relation("PsychologistTherapies", fields: [psychologist_id], references: [id])
   consultant   User @relation("ConsultantTherapies",   fields: [consultant_id],   references: [id])
@@ -218,7 +217,6 @@ model BillingPlan {
   recurrence      String?
   notes           String?
   created_at      DateTime    @default(now())
-  updated_at      DateTime    @updatedAt
 
   therapy  Therapy   @relation(fields: [therapy_id], references: [id])
   payments Payment[]
@@ -258,14 +256,20 @@ model SessionNote {
   author  User           @relation(fields: [author_id], references: [id])
 }
 
+enum AvailabilityType {
+  AVAILABLE
+  BLOCKED
+}
+
 model AvailabilitySlot {
   id                      String @id @default(uuid())
-  psychologist_profile_id String
+  psychologist_id         String
   day_of_week             Int    // 0-6 (Sunday-Saturday)
   start_time              String // HH:mm
   end_time                String // HH:mm
+  type                    AvailabilityType @default(AVAILABLE)
 
-  profile PsychologistProfile @relation(fields: [psychologist_profile_id], references: [id])
+  profile PsychologistProfile @relation(fields: [psychologist_id], references: [id])
 }
 
 model TherapyRequest {
@@ -330,24 +334,24 @@ model GoalProgressEntry {
 }
 
 model Payment {
-  id                    String        @id @default(uuid())
-  session_id            String?       @unique
-  event_registration_id String?       @unique
-  billing_plan_id       String?
-  registered_by         String
-  amount                Decimal       @db.Decimal(10, 2)
-  method                PaymentMethod
-  status                PaymentStatus @default(PENDING)
-  scope                 PaymentScope
-  reference             String?
-  notes                 String?
-  paid_at               DateTime?
-  created_at            DateTime      @default(now())
+  id            String         @id @default(uuid())
+  session_id    String?        @unique
+  event_id      String?
+  billing_plan_id String?
+  consultant_id String
+  amount        Decimal        @db.Decimal(10, 2)
+  method        PaymentMethod?
+  status        PaymentStatus  @default(PENDING)
+  scope         PaymentScope
+  reference     String?
+  notes         String?
+  paid_at       DateTime?
+  created_at    DateTime       @default(now())
 
-  session            TherapySession?    @relation(fields: [session_id], references: [id])
-  event_registration EventRegistration? @relation(fields: [event_registration_id], references: [id])
-  billing_plan       BillingPlan?       @relation(fields: [billing_plan_id], references: [id])
-  registrar          User               @relation(fields: [registered_by], references: [id])
+  session      TherapySession? @relation(fields: [session_id], references: [id])
+  consultant   User            @relation(fields: [consultant_id], references: [id])
+  event        Event?          @relation(fields: [event_id], references: [id])
+  billing_plan BillingPlan?    @relation(fields: [billing_plan_id], references: [id])
 }
 
 model Event {
@@ -363,6 +367,7 @@ model Event {
   created_at       DateTime  @default(now())
 
   registrations EventRegistration[]
+  payments      Payment[]
 }
 
 model EventRegistration {
@@ -374,7 +379,6 @@ model EventRegistration {
 
   event      Event    @relation(fields: [event_id], references: [id])
   consultant User     @relation(fields: [consultant_id], references: [id])
-  payment    Payment?
 }
 
 model Message {
