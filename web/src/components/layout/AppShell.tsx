@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, User as UserIcon, LogOut, Users, Inbox } from 'lucide-react';
+import { hasRole } from '../../utils/role-permissions';
 
 export const AppShell: React.FC = () => {
   const { user, logout } = useAuth();
@@ -11,6 +12,9 @@ export const AppShell: React.FC = () => {
     const path = location.pathname;
     if (path.includes('/dashboard')) return 'Dashboard';
     if (path.includes('/perfil')) return 'Mi Perfil';
+    if (path.includes('/terapias/nueva')) return 'Nueva Terapia';
+    if (path.includes('/terapias')) return 'Mis Terapias';
+    if (path.includes('/solicitudes')) return 'Solicitudes';
     if (path.includes('/cambiar-contrasena')) return 'Cambiar Contraseña';
     return 'REDAPSI';
   };
@@ -26,7 +30,7 @@ export const AppShell: React.FC = () => {
           <h1 className="text-2xl font-black italic tracking-tighter">REDAPSI</h1>
         </div>
         
-        <nav className="flex-1 p-6 space-y-3">
+        <nav className="flex-1 p-6 space-y-3 overflow-y-auto">
           <div className="px-4 py-2 text-[10px] text-white/40 uppercase tracking-[0.25em] font-black">Menú Principal</div>
           
           <NavLink 
@@ -41,18 +45,46 @@ export const AppShell: React.FC = () => {
             <span>Dashboard</span>
           </NavLink>
 
-          {(user?.role === 'PSYCHOLOGIST' || user?.role === 'ADMIN_PSYCHOLOGIST') && (
+          {(hasRole(user, 'PSYCHOLOGIST') || hasRole(user, 'ADMIN')) && (
             <NavLink 
-              to="/perfil" 
+              to="/terapias" 
               className={({ isActive }) => 
                 `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
                   isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
                 }`
               }
             >
-              <User size={20} />
-              <span>Mi Perfil</span>
+              <Users size={20} />
+              <span>Mis Terapias</span>
             </NavLink>
+          )}
+
+          {hasRole(user, 'PSYCHOLOGIST') && (
+            <>
+              <NavLink 
+                to="/solicitudes" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <Inbox size={20} />
+                <span>Solicitudes</span>
+              </NavLink>
+
+              <NavLink 
+                to="/perfil" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <UserIcon size={20} />
+                <span>Mi Perfil</span>
+              </NavLink>
+            </>
           )}
         </nav>
 
@@ -96,7 +128,7 @@ export const AppShell: React.FC = () => {
                {user?.avatar_url ? (
                   <img src={`${import.meta.env.VITE_API_BASE_URL || ''}${user.avatar_url}`} alt="Profile" className="w-full h-full object-cover" />
                ) : (
-                  <User size={20} className="text-slate-300" />
+                  <UserIcon size={20} className="text-slate-300" />
                )}
             </div>
           </div>

@@ -10,6 +10,10 @@ import { AppShell } from './components/layout/AppShell';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ChangePasswordPage } from './pages/auth/ChangePasswordPage';
 import { PsychologistProfilePage } from './pages/perfil/PsychologistProfilePage';
+import { TerapiasListPage } from './pages/terapias/TerapiasListPage';
+import { TherapyRequestsPage } from './pages/terapias/TherapyRequestsPage';
+import { CreateTherapyPage } from './pages/terapias/CreateTherapyPage';
+import { TherapyDetailPage } from './pages/terapias/TherapyDetailPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +63,30 @@ function App() {
               <Route path="perfil" element={
                 <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST']}>
                   <PsychologistProfilePage />
+                </RoleGuard>
+              } />
+
+              <Route path="terapias" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST', 'ADMIN']}>
+                  <TerapiasListPage />
+                </RoleGuard>
+              } />
+
+              <Route path="terapias/nueva" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST']}>
+                  <CreateTherapyPage />
+                </RoleGuard>
+              } />
+
+              <Route path="terapias/:id" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST', 'ADMIN']}>
+                  <TherapyDetailPage />
+                </RoleGuard>
+              } />
+
+              <Route path="solicitudes" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST']}>
+                  <TherapyRequestsPage />
                 </RoleGuard>
               } />
             </Route>

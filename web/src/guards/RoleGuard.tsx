@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { hasRole } from '../utils/role-permissions';
 
 export const RoleGuard: React.FC<{ children: React.ReactNode; allowedRoles: string[] }> = ({ 
   children, 
@@ -43,7 +44,9 @@ export const RoleGuard: React.FC<{ children: React.ReactNode; allowedRoles: stri
     );
   }
 
-  if (!allowedRoles.includes(user.role) && user.role !== 'ADMIN_PSYCHOLOGIST') {
+  const isAuthorized = allowedRoles.some(role => hasRole(user, role));
+
+  if (!isAuthorized) {
     return <Navigate to="/dashboard" replace />;
   }
 

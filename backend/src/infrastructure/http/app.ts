@@ -8,6 +8,11 @@ import { authRouter } from './routes/auth';
 import { uploadRouter } from './routes/upload';
 import { psychologistsRouter } from './routes/psychologists';
 import { consultantsRouter } from './routes/consultants';
+import { therapiesRouter } from './routes/therapies';
+import { therapyRequestsRouter } from './routes/therapy-requests';
+import { notificationsRouter } from './routes/notifications';
+import { propositionsRouter } from './routes/propositions';
+import { sessionRequestsRouter } from './routes/session-requests';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -42,6 +47,11 @@ app.use('/auth', authRouter);
 app.use('/upload', uploadRouter);
 app.use('/psychologists', psychologistsRouter);
 app.use('/consultants', consultantsRouter);
+app.use('/therapies', therapiesRouter);
+app.use('/therapy-requests', therapyRequestsRouter);
+app.use('/notifications', notificationsRouter);
+app.use('/propositions', propositionsRouter);
+app.use('/session-requests', sessionRequestsRouter);
 
 // Global Error Handler
 app.use(errorHandler);

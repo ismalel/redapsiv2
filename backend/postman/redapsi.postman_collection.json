@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "8a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
 		"name": "REDAPSI v2 API",
-		"description": "Collection for REDAPSI v2 - All implemented phases (Auth, Upload, Profiles & Onboarding)",
+		"description": "Collection for REDAPSI v2 - All implemented phases (Auth, Upload, Profiles, Onboarding & Therapy Management)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -261,16 +261,6 @@
 				{
 					"name": "Get My Profile",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -290,16 +280,6 @@
 				{
 					"name": "Update My Profile",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -328,21 +308,11 @@
 				{
 					"name": "Update My Availability",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"day_of_week\": 1,\n        \"start_time\": \"09:00\",\n        \"end_time\": \"14:00\"\n    },\n    {\n        \"day_of_week\": 2,\n        \"start_time\": \"15:00\",\n        \"end_time\": \"20:00\"\n    }\n]",
+							"raw": "[\n    {\n        \"day_of_week\": 1,\n        \"start_time\": \"09:00\",\n        \"end_time\": \"14:00\",\n        \"type\": \"AVAILABLE\"\n    }\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -371,16 +341,6 @@
 				{
 					"name": "Get My Profile",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -400,16 +360,6 @@
 				{
 					"name": "Update My Profile",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
@@ -438,16 +388,6 @@
 				{
 					"name": "Get Onboarding State",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -463,7 +403,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "CONSULTANT_ID_HERE"
+									"value": "CONSULTANT_ID"
 								}
 							]
 						}
@@ -473,21 +413,11 @@
 				{
 					"name": "Submit Onboarding Step",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"birth_date\": \"1995-10-10\",\n    \"reason\": \"Busco terapia feminista por temas de ansiedad.\"\n}",
+							"raw": "{\n    \"data\": {\n        \"birth_date\": \"1995-10-10\",\n        \"reason\": \"Busco terapia feminista por temas de ansiedad.\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -508,7 +438,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "CONSULTANT_ID_HERE"
+									"value": "CONSULTANT_ID"
 								},
 								{
 									"key": "step",
@@ -522,21 +452,489 @@
 			]
 		},
 		{
+			"name": "Therapies",
+			"item": [
+				{
+					"name": "Create Therapy (Flow A)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"consultant_email\": \"consultant_a@test.com\",\n    \"consultant_name\": \"Consultante Flow A\",\n    \"modality\": \"virtual\",\n    \"billing_plan\": {\n        \"billing_type\": \"PER_SESSION\",\n        \"default_fee\": 500\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/therapies",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List My Therapies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies?page=1&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Therapy Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Therapy",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"modality\": \"in_person\",\n    \"notes\": \"Actualización de notas.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/therapies/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Therapy Requests",
+			"item": [
+				{
+					"name": "Send Therapy Request (Flow B)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"psychologist_id\": \"PSY_ID\",\n    \"message\": \"Hola, me interesa iniciar proceso contigo.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/therapy-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapy-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Respond to Request",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"ACCEPTED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/therapy-requests/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapy-requests",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REQUEST_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List My Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapy-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapy-requests"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Session Scheduling",
+			"item": [
+				{
+					"name": "Create Proposition (Psychologist)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"proposed_slots\": [\n        \"2026-03-10T10:00:00Z\",\n        \"2026-03-11T15:00:00Z\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/therapies/:therapyId/propositions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":therapyId",
+								"propositions"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Propositions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies/:therapyId/propositions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":therapyId",
+								"propositions"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Select Slot (Consultant)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"selected_slot\": \"2026-03-10T10:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/propositions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"propositions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "PROPOSITION_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request Session (Consultant)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"proposed_at\": \"2026-03-12T09:00:00Z\",\n    \"notes\": \"Me gustaría este horario por favor.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/therapies/:therapyId/session-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":therapyId",
+								"session-requests"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/therapies/:therapyId/session-requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"therapies",
+								":therapyId",
+								"session-requests"
+							],
+							"variable": [
+								{
+									"key": "therapyId",
+									"value": "THERAPY_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Respond to Session Request",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"ACCEPTED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/session-requests/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"session-requests",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "REQUEST_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "List My Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications?page=1&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/unread-count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"unread-count"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/:id/read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								":id",
+								"read"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "NOTIF_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notifications/read-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"read-all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Upload",
 			"item": [
 				{
 					"name": "Upload File",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -612,7 +1010,11 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					""
+					"const res = pm.response.json();",
+					"if (res.success && res.data.access_token) {",
+					"    pm.collectionVariables.set(\"access_token\", res.data.access_token);",
+					"    pm.collectionVariables.set(\"refresh_token\", res.data.refresh_token);",
+					"}"
 				]
 			}
 		}
