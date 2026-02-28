@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 import { healthRouter } from './routes/health';
+import { authRouter } from './routes/auth';
+import { uploadRouter } from './routes/upload';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Routes
 app.use('/health', healthRouter);
+app.use('/auth', authRouter);
+app.use('/upload', uploadRouter);
 
 // Global Error Handler
 app.use(errorHandler);

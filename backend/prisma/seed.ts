@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Use 12 rounds for bcrypt per spec
+  // Pre-generating hashes to ensure consistency across re-seeds
   const passwordHash = await bcrypt.hash('Admin1234!', 12);
   const psychHash = await bcrypt.hash('Psych1234!', 12);
   const consultHash = await bcrypt.hash('Consult1234!', 12);
@@ -12,7 +13,7 @@ async function main() {
   // 1. Users (Idempotent upsert)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@redapsi.app' },
-    update: {},
+    update: { password_hash: passwordHash },
     create: {
       email: 'admin@redapsi.app',
       name: 'Administradora REDAPSI',
@@ -23,7 +24,7 @@ async function main() {
 
   const adminPsy = await prisma.user.upsert({
     where: { email: 'adminpsy@redapsi.app' },
-    update: {},
+    update: { password_hash: passwordHash },
     create: {
       email: 'adminpsy@redapsi.app',
       name: 'Admin Psicóloga',
@@ -34,7 +35,7 @@ async function main() {
 
   const psy1User = await prisma.user.upsert({
     where: { email: 'psy1@redapsi.app' },
-    update: {},
+    update: { password_hash: psychHash },
     create: {
       email: 'psy1@redapsi.app',
       name: 'Psicóloga Uno',
@@ -59,12 +60,16 @@ async function main() {
 
   const psy2User = await prisma.user.upsert({
     where: { email: 'psy2@redapsi.app' },
-    update: {},
+    update: { 
+      password_hash: psychHash,
+      must_change_password: true
+    },
     create: {
       email: 'psy2@redapsi.app',
       name: 'Psicóloga Dos',
       password_hash: psychHash,
       role: Role.PSYCHOLOGIST,
+      must_change_password: true,
     },
   });
 
@@ -100,7 +105,7 @@ async function main() {
 
   const consultant1User = await prisma.user.upsert({
     where: { email: 'consultant1@redapsi.app' },
-    update: {},
+    update: { password_hash: consultHash },
     create: {
       email: 'consultant1@redapsi.app',
       name: 'Consultante Uno',
@@ -122,7 +127,7 @@ async function main() {
 
   const consultant2User = await prisma.user.upsert({
     where: { email: 'consultant2@redapsi.app' },
-    update: {},
+    update: { password_hash: consultHash },
     create: {
       email: 'consultant2@redapsi.app',
       name: 'Consultante Dos',
@@ -144,7 +149,7 @@ async function main() {
 
   const consultant3User = await prisma.user.upsert({
     where: { email: 'consultant3@redapsi.app' },
-    update: {},
+    update: { password_hash: consultHash },
     create: {
       email: 'consultant3@redapsi.app',
       name: 'Consultante Tres',

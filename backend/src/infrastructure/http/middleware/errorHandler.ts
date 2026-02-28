@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from '../../../shared/apiError';
 import { Prisma } from '@prisma/client';
+import { ZodError } from 'zod';
+import multer from 'multer';
 
 export const errorHandler = (
   err: Error,
@@ -18,6 +20,38 @@ export const errorHandler = (
         code: err.code,
         message: err.message,
         details: err.details,
+      },
+    });
+  }
+
+  // Zod Validation Error
+  if (err instanceof ZodError) {
+    return res.status(422).json({
+      success: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'The provided data is invalid.',
+        details: err.errors,
+      },
+    });
+  }
+
+  // Multer Error Handling
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({
+        success: false,
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'The uploaded file exceeds the allowed size limit.',
+        },
+      });
+    }
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: 'UPLOAD_ERROR',
+        message: err.message,
       },
     });
   }
