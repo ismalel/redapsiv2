@@ -40,8 +40,8 @@
 								"exec": [
 									"const res = pm.response.json();",
 									"if (res.success && res.data.access_token) {",
-									"    pm.environment.set(\"access_token\", res.data.access_token);",
-									"    pm.environment.set(\"refresh_token\", res.data.refresh_token);",
+									"    pm.collectionVariables.set(\"access_token\", res.data.access_token);",
+									"    pm.collectionVariables.set(\"refresh_token\", res.data.refresh_token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -580,6 +580,23 @@
 			}
 		]
 	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		}
+	],
 	"event": [
 		{
 			"listen": "prerequest",

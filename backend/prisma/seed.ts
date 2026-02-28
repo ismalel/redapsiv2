@@ -4,13 +4,11 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Use 12 rounds for bcrypt per spec
-  // Pre-generating hashes to ensure consistency across re-seeds
   const passwordHash = await bcrypt.hash('Admin1234!', 12);
   const psychHash = await bcrypt.hash('Psych1234!', 12);
   const consultHash = await bcrypt.hash('Consult1234!', 12);
 
-  // 1. Users (Idempotent upsert)
+  // 1. Users
   const admin = await prisma.user.upsert({
     where: { email: 'admin@redapsi.app' },
     update: { password_hash: passwordHash },
@@ -33,7 +31,7 @@ async function main() {
     },
   });
 
-  await prisma.psychologistProfile.upsert({
+  const adminPsyProfile = await prisma.psychologistProfile.upsert({
     where: { user_id: adminPsy.id },
     update: {},
     create: {
@@ -101,19 +99,18 @@ async function main() {
     }
   });
 
-  // Psychologist Availability (Mon-Fri 9-18h)
+  // Availability
   const profiles = [psy1Profile, psy2Profile];
   for (const profile of profiles) {
     for (let day = 1; day <= 5; day++) {
-      // Find if slot exists to ensure idempotency
-      const existingSlot = await prisma.availabilitySlot.findFirst({
-        where: { psychologist_id: profile.id, day_of_week: day }
+      await prisma.availabilitySlot.create({
+        data: { 
+          psychologist_profile_id: profile.id, 
+          day_of_week: day, 
+          start_time: '09:00', 
+          end_time: '18:00' 
+        }
       });
-      if (!existingSlot) {
-        await prisma.availabilitySlot.create({
-          data: { psychologist_id: profile.id, day_of_week: day, start_time: '09:00', end_time: '18:00' }
-        });
-      }
     }
   }
 
@@ -157,7 +154,7 @@ async function main() {
       user_id: consultant2User.id,
       onboarding_status: OnboardingStatus.INCOMPLETE,
       onboarding_step: 3,
-      onboarding_data: { step1: "completado", step2: "completado" }
+      onboarding_data: { step1: "completado" }
     }
   });
 
@@ -182,48 +179,39 @@ async function main() {
     }
   });
 
-  // 2. Therapy (Idempotent find or create)
-  let therapy1 = await prisma.therapy.findFirst({
-    where: { psychologist_id: psy1User.id, consultant_id: consultant1User.id }
-  });
-
-  if (!therapy1) {
-    therapy1 = await prisma.therapy.create({
-      data: {
-        psychologist_id: psy1User.id,
-        consultant_id: consultant1User.id,
-        origin: TherapyOrigin.PSYCHOLOGIST_INITIATED,
-        modality: 'virtual',
-        status: TherapyStatus.ACTIVE,
-        billing_plan: {
-          create: {
-            billing_type: BillingType.PER_SESSION,
-            default_fee: 500.00,
-          }
+  // 2. Therapy
+  const therapy1 = await prisma.therapy.create({
+    data: {
+      psychologist_id: psy1User.id,
+      consultant_id: consultant1User.id,
+      origin: TherapyOrigin.PSYCHOLOGIST_INITIATED,
+      modality: 'virtual',
+      status: TherapyStatus.ACTIVE,
+      billing_plan: {
+        create: {
+          billing_type: BillingType.PER_SESSION,
+          default_fee: 500.00,
         }
       }
-    });
-  }
+    }
+  });
 
   // 3. Therapy Request
   await prisma.therapyRequest.upsert({
-    where: { id: 'seed-request-1' }, 
+    where: { id: 'seed-request-1' },
     update: {},
     create: {
       id: 'seed-request-1',
       psychologist_id: psy2User.id,
       consultant_id: consultant3User.id,
-      message: 'Me gustaría iniciar terapia feminista.',
+      message: 'Me gustaría iniciar terapia.',
       status: 'PENDING'
     }
   });
 
   // 4. Sessions
-  const completedSession = await prisma.therapySession.upsert({
-    where: { id: 'seed-session-1' },
-    update: {},
-    create: {
-      id: 'seed-session-1',
+  const completedSession = await prisma.therapySession.create({
+    data: {
       therapy_id: therapy1.id,
       scheduled_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       status: SessionStatus.COMPLETED,
@@ -231,11 +219,8 @@ async function main() {
     }
   });
 
-  await prisma.therapySession.upsert({
-    where: { id: 'seed-session-2' },
-    update: {},
-    create: {
-      id: 'seed-session-2',
+  await prisma.therapySession.create({
+    data: {
       therapy_id: therapy1.id,
       scheduled_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
       status: SessionStatus.SCHEDULED,
@@ -243,53 +228,42 @@ async function main() {
     }
   });
 
-  await prisma.therapySession.upsert({
-    where: { id: 'seed-session-3' },
-    update: {},
-    create: {
-      id: 'seed-session-3',
+  await prisma.therapySession.create({
+    data: {
       therapy_id: therapy1.id,
       scheduled_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       status: SessionStatus.CANCELLED,
       session_fee: 500.00,
       cancelled_by: psy1User.id,
-      // cancelled_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      cancel_reason: 'Emergencia de la psicóloga',
+      cancelled_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      cancel_reason: 'Emergencia',
     }
   });
 
-  // 5. Session Notes
-  await prisma.sessionNote.upsert({
-    where: { id: 'seed-note-1' },
-    update: {},
-    create: {
-      id: 'seed-note-1',
+  // 5. Notes
+  await prisma.sessionNote.create({
+    data: {
       session_id: completedSession.id,
       author_id: psy1User.id,
-      content: 'La consultante muestra avances significativos.',
+      content: 'Nota pública.',
       is_private: false
     }
   });
 
-  await prisma.sessionNote.upsert({
-    where: { id: 'seed-note-2' },
-    update: {},
-    create: {
-      id: 'seed-note-2',
+  await prisma.sessionNote.create({
+    data: {
       session_id: completedSession.id,
       author_id: psy1User.id,
-      content: 'Observación privada: explorar trauma infantil.',
+      content: 'Nota privada.',
       is_private: true
     }
   });
 
   // 6. Payment
-  await prisma.payment.upsert({
-    where: { session_id: completedSession.id },
-    update: {},
-    create: {
+  await prisma.payment.create({
+    data: {
       session_id: completedSession.id,
-      consultant_id: consultant1User.id,
+      registered_by: psy1User.id,
       amount: 500.00,
       method: 'CASH',
       status: 'PAID',
@@ -299,92 +273,39 @@ async function main() {
   });
 
   // 7. Goals
-  const goal1 = await prisma.goal.upsert({
-    where: { id: 'seed-goal-1' },
-    update: {},
-    create: {
-      id: 'seed-goal-1',
+  const goal1 = await prisma.goal.create({
+    data: {
       therapy_id: therapy1.id,
-      title: 'Reducir ansiedad social',
-      description: 'Trabajar en técnicas de respiración y exposición gradual.',
+      title: 'Meta 1',
       status: 'IN_PROGRESS',
       progress: 40
     }
   });
 
-  const goal2 = await prisma.goal.upsert({
-    where: { id: 'seed-goal-2' },
-    update: {},
-    create: {
-      id: 'seed-goal-2',
-      therapy_id: therapy1.id,
-      title: 'Mejorar asertividad',
-      description: 'Aprender a establecer límites claros en relaciones personales.',
-      status: 'PENDING',
-      progress: 10
+  await prisma.goalProgressEntry.create({
+    data: {
+      goal_id: goal1.id,
+      progress: 20,
+      notes: 'Inicio'
     }
   });
 
-  // Goal Progress Entries (Idempotent)
-  const entries = [
-    { id: 'goal-entry-1', goal_id: goal1.id, progress: 20, notes: 'Inicio de tratamiento', created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
-    { id: 'goal-entry-2', goal_id: goal1.id, progress: 40, notes: 'Mejora en técnicas de respiración', created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-    { id: 'goal-entry-3', goal_id: goal2.id, progress: 0, notes: 'Establecimiento de línea base', created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
-    { id: 'goal-entry-4', goal_id: goal2.id, progress: 10, notes: 'Primeros ejercicios de asertividad', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) }
-  ];
-
-  for (const entry of entries) {
-    await prisma.goalProgressEntry.upsert({
-      where: { id: entry.id },
-      update: {},
-      create: entry
-    });
-  }
-
-  // 8. Notifications (Idempotent)
-  const notifications = [
-    { id: 'notif-1', type: NotificationType.SESSION_SCHEDULED, title: 'Sesión Programada', body: 'Tu próxima sesión ha sido confirmada.', read: false },
-    { id: 'notif-2', type: NotificationType.PAYMENT_REGISTERED, title: 'Pago Registrado', body: 'Se ha registrado tu pago de $500.', read: true },
-    { id: 'notif-3', type: NotificationType.GOAL_UPDATED, title: 'Objetivo Actualizado', body: 'Tu progreso en "Reducir ansiedad" ha sido actualizado.', read: false },
-    { id: 'notif-4', type: NotificationType.NEW_MESSAGE, title: 'Nuevo Mensaje', body: 'Tu psicóloga te ha enviado un mensaje.', read: false },
-    { id: 'notif-5', type: NotificationType.PROPOSITION_RECEIVED, title: 'Nuevos horarios propuestos', body: 'Revisa las opciones para tu próxima sesión.', read: false }
-  ];
-
-  for (const n of notifications) {
-    await prisma.notification.upsert({
-      where: { id: n.id },
-      update: {},
-      create: {
-        user_id: consultant1User.id,
-        ...n
-      }
-    });
-  }
+  // 8. Notifications
+  await prisma.notification.create({
+    data: {
+      user_id: consultant1User.id,
+      type: NotificationType.SESSION_SCHEDULED,
+      title: 'Sesión Programada',
+      body: 'Tu sesión ha sido confirmada.',
+    }
+  });
 
   // 9. Events
-  await prisma.event.upsert({
-    where: { id: 'seed-event-1' },
-    update: {},
-    create: {
-      id: 'seed-event-1',
-      title: 'Taller de Psicología Feminista',
-      description: 'Un taller gratuito sobre los fundamentos de la psicología feminista.',
+  await prisma.event.create({
+    data: {
+      title: 'Evento 1',
       date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
       cost: 0,
-      location: 'En línea',
-    }
-  });
-
-  await prisma.event.upsert({
-    where: { id: 'seed-event-2' },
-    update: {},
-    create: {
-      id: 'seed-event-2',
-      title: 'Seminario de Cuidado Informado en Trauma',
-      description: 'Un seminario pagado sobre técnicas de cuidado para sobrevivientes de trauma.',
-      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      cost: 200.00,
-      location: 'Centro Comunitario',
     }
   });
 

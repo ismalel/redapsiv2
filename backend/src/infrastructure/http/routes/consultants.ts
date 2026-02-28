@@ -43,7 +43,9 @@ router.get('/:id/onboarding', requireAuth, async (req: AuthRequest, res: Respons
     // Middleware for authorization: ADMIN, PSYCHOLOGIST, or OWN consultant
     const targetUserId = req.params.id;
     const isOwn = req.user!.id === targetUserId;
-    const isStaff = req.user!.role === Role.ADMIN || req.user!.role === Role.PSYCHOLOGIST || req.user!.role === Role.ADMIN_PSYCHOLOGIST;
+    
+    // Severity 2 Fix: Use hasRole helper
+    const isStaff = hasRole(req.user!, Role.ADMIN) || hasRole(req.user!, Role.PSYCHOLOGIST);
 
     if (!isOwn && !isStaff) {
        return res.status(403).json({ error: { code: 'FORBIDDEN', message: 'You cannot access this onboarding data' } });

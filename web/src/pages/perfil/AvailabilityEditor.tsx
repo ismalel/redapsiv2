@@ -32,7 +32,7 @@ export const AvailabilityEditor: React.FC<AvailabilityEditorProps> = ({ initialS
   const [error, setError] = useState<string | null>(null);
   
   // Modal/Form state for adding new slot
-  const [showAddModal, setShowAddAddModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newSlot, setNewSlot] = useState<Slot>({
     day_of_week: 1,
     start_time: '09:00',
@@ -95,7 +95,7 @@ export const AvailabilityEditor: React.FC<AvailabilityEditorProps> = ({ initialS
       end_time: minutesToTime(Math.min(endTotalMinutes, (END_HOUR + 1) * 60)),
       type: 'AVAILABLE'
     });
-    setShowAddAddModal(true);
+    setShowAddModal(true);
   };
 
   const addSlot = () => {
@@ -106,7 +106,7 @@ export const AvailabilityEditor: React.FC<AvailabilityEditorProps> = ({ initialS
     }
 
     setSlots([...slots, { ...newSlot, id: Math.random().toString(36).substr(2, 9) }]);
-    setShowAddAddModal(false);
+    setShowAddModal(false);
     setError(null);
   };
 
@@ -319,7 +319,7 @@ export const AvailabilityEditor: React.FC<AvailabilityEditorProps> = ({ initialS
 
             <div className="p-8 bg-slate-50 flex gap-3">
               <button
-                onClick={() => setShowAddAddModal(false)}
+                onClick={() => setShowAddModal(false)}
                 className="flex-1 px-6 py-3 bg-white border-2 border-slate-200 text-slate-400 font-black rounded-xl uppercase tracking-widest text-xs hover:bg-slate-100 transition-all"
               >
                 Cancelar

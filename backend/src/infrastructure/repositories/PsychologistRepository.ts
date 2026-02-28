@@ -51,7 +51,7 @@ export class PsychologistRepository implements IPsychologistRepository {
   async setAvailability(profileId: string, slots: { day_of_week: number; start_time: string; end_time: string; type: 'AVAILABLE' | 'BLOCKED' }[]) {
     await prisma.$transaction([
       prisma.availabilitySlot.deleteMany({
-        where: { psychologist_id: profileId }
+        where: { psychologist_profile_id: profileId }
       }),
       prisma.availabilitySlot.createMany({
         data: slots.map(slot => ({
@@ -59,7 +59,7 @@ export class PsychologistRepository implements IPsychologistRepository {
           start_time: slot.start_time,
           end_time: slot.end_time,
           type: slot.type,
-          psychologist_id: profileId
+          psychologist_profile_id: profileId
         }))
       })
     ]);
