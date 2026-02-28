@@ -128,7 +128,7 @@ export const AppShell: React.FC = () => {
                {user?.avatar_url ? (
                   <img src={`${import.meta.env.VITE_API_BASE_URL || ''}${user.avatar_url}`} alt="Profile" className="w-full h-full object-cover" />
                ) : (
-                  <User size={20} className="text-slate-300" />
+                  <UserIcon size={20} className="text-slate-300" />
                )}
             </div>
           </div>
