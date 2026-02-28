@@ -1,12 +1,12 @@
 import { Router, Response, NextFunction } from 'express';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, AuthRequest } from '../middleware/auth';
 import { uploadMiddleware } from '../middleware/upload';
 import { sendSuccess } from '../../../shared/response';
 import { ApiError } from '../../../shared/apiError';
 
 const router = Router();
 
-router.post('/', requireAuth, (req: any, res: Response, next: NextFunction) => {
+router.post('/', requireAuth, (req: AuthRequest, res: Response, next: NextFunction) => {
   uploadMiddleware.single('file')(req, res, (err: any) => {
     if (err) {
       if (err instanceof Error && err.message === 'File too large') {

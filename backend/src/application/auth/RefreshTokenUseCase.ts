@@ -3,9 +3,14 @@ import { IAuthRepository } from '../../domain/repositories/IAuthRepository';
 import { TokenPair } from '../../domain/entities/auth';
 import { IRefreshTokenUseCase, RefreshTokenInput } from './auth.use-cases';
 import { ApiError } from '../../shared/apiError';
+import { TokenService } from './TokenService';
 
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
-  constructor(private authRepository: IAuthRepository) {}
+  private tokenService: TokenService;
+
+  constructor(private authRepository: IAuthRepository) {
+    this.tokenService = new TokenService();
+  }
 
   async execute(input: RefreshTokenInput): Promise<TokenPair> {
     const { refresh_token } = input;
@@ -16,7 +21,8 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       throw ApiError.unauthorized('Invalid refresh token', 'INVALID_REFRESH_TOKEN');
     }
 
-    const storedToken = await this.authRepository.findRefreshToken(refresh_token);
+    const hashedRefreshToken = this.tokenService.hashToken(refresh_token);
+    const storedToken = await this.authRepository.findRefreshToken(hashedRefreshToken);
 
     if (!storedToken || storedToken.revoked || new Date() > storedToken.expires_at) {
       throw ApiError.unauthorized('Refresh token expired or revoked', 'INVALID_REFRESH_TOKEN');
@@ -28,38 +34,19 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
       throw ApiError.unauthorized('User not found or inactive', 'USER_INACTIVE');
     }
 
-    const tokens = this.generateTokenPair(user.id, user.role);
+    const tokens = this.tokenService.generateTokenPair(user.id, user.role);
+    const newHashedRefreshToken = this.tokenService.hashToken(tokens.refresh_token);
 
-    await this.authRepository.revokeRefreshToken(refresh_token);
+    // Revoke old token and save new one
+    await this.authRepository.revokeRefreshToken(hashedRefreshToken);
     
     const refreshTokenPayload = jwt.decode(tokens.refresh_token) as any;
     await this.authRepository.saveRefreshToken(
       user.id,
-      tokens.refresh_token,
+      newHashedRefreshToken,
       new Date(refreshTokenPayload.exp * 1000)
     );
 
     return tokens;
-  }
-
-  private generateTokenPair(userId: string, role: string): TokenPair {
-    const accessToken = jwt.sign(
-      { sub: userId, role },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
-    );
-
-    const refreshToken = jwt.sign(
-      { sub: userId },
-      process.env.JWT_REFRESH_SECRET!,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
-    );
-
-    return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      token_type: 'Bearer',
-      expires_in: 900,
-    };
   }
 }

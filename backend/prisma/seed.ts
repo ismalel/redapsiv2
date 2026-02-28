@@ -33,6 +33,20 @@ async function main() {
     },
   });
 
+  await prisma.psychologistProfile.upsert({
+    where: { user_id: adminPsy.id },
+    update: {},
+    create: {
+      user_id: adminPsy.id,
+      license_number: 'ADM-PSY-001',
+      specializations: ['Administración', 'Terapia de Pareja'],
+      bio: 'Administradora y psicóloga con amplia experiencia.',
+      session_fee: 800.00,
+      modalities: ['virtual', 'in_person'],
+      languages: ['es'],
+    }
+  });
+
   const psy1User = await prisma.user.upsert({
     where: { email: 'psy1@redapsi.app' },
     update: { password_hash: psychHash },

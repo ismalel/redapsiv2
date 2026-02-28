@@ -15,6 +15,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      staleTime: 30000,
     },
   },
 });
@@ -49,10 +50,9 @@ function App() {
               } />
               
               <Route path="cambiar-contrasena" element={
-                <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-md mx-auto mt-12">
-                  <h2 className="text-2xl font-bold text-slate-800 mb-4 text-center">Cambiar Contraseña</h2>
-                  <p className="text-slate-600 text-sm mb-6 text-center italic">Este formulario se implementará para usuarios con el marcador must_change_password=true.</p>
-                </div>
+                <AuthGuard>
+                  <ChangePasswordPage />
+                </AuthGuard>
               } />
             </Route>
 

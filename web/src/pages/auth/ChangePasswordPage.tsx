@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import apiClient from '../../api/client';
 
 const changePasswordSchema = z.object({
@@ -17,6 +18,7 @@ const changePasswordSchema = z.object({
 type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 export const ChangePasswordPage: React.FC = () => {
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,6 +39,11 @@ export const ChangePasswordPage: React.FC = () => {
         current_password: data.current_password,
         new_password: data.new_password,
       });
+      
+      if (user) {
+        updateUser({ ...user, must_change_password: false });
+      }
+      
       navigate('/dashboard');
     } catch (error: any) {
       const code = error.response?.data?.error?.code;
@@ -87,7 +94,7 @@ export const ChangePasswordPage: React.FC = () => {
               <input
                 {...register('new_password')}
                 type="password"
-                className={`w-full px-4 py-3 rounded-lg border ${errors.new_password ? 'border-red-500 bg-red-50' : 'border-slate-300 focus:border-brand-purple'} focus:ring-4 focus:ring-brand-purple/10 outline-none transition-all`}
+                className={`w-full px-4 py-3 rounded-lg border ${errors.new_password ? 'border-red-500 bg-red-50' : 'border-slate-100 bg-slate-50 focus:border-brand-purple focus:bg-white'} outline-none transition-all duration-300 font-medium text-slate-700 text-sm`}
               />
               {errors.new_password && (
                 <p className="mt-1 text-xs font-medium text-red-500">{errors.new_password.message}</p>
@@ -101,7 +108,7 @@ export const ChangePasswordPage: React.FC = () => {
               <input
                 {...register('confirm_password')}
                 type="password"
-                className={`w-full px-4 py-3 rounded-lg border ${errors.confirm_password ? 'border-red-500 bg-red-50' : 'border-slate-300 focus:border-brand-purple'} focus:ring-4 focus:ring-brand-purple/10 outline-none transition-all`}
+                className={`w-full px-4 py-3 rounded-lg border ${errors.confirm_password ? 'border-red-500 bg-red-50' : 'border-slate-100 bg-slate-50 focus:border-brand-purple focus:bg-white'} outline-none transition-all duration-300 font-medium text-slate-700 text-sm`}
               />
               {errors.confirm_password && (
                 <p className="mt-1 text-xs font-medium text-red-500">{errors.confirm_password.message}</p>

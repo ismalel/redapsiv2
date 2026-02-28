@@ -6,7 +6,7 @@ export type UserWithRole = {
 
 export const hasRole = (user: UserWithRole, requiredRole: Role): boolean => {
   if (user.role === Role.ADMIN_PSYCHOLOGIST) {
-    return requiredRole === Role.ADMIN || requiredRole === Role.PSYCHOLOGIST;
+    return requiredRole === Role.ADMIN || requiredRole === Role.PSYCHOLOGIST || requiredRole === Role.ADMIN_PSYCHOLOGIST;
   }
   
   return user.role === requiredRole;

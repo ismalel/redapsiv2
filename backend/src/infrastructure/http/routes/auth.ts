@@ -7,7 +7,7 @@ import { LogoutUseCase } from '../../../application/auth/LogoutUseCase';
 import { ChangePasswordUseCase } from '../../../application/auth/ChangePasswordUseCase';
 import { registerSchema, loginSchema, refreshTokenSchema, changePasswordSchema } from '../../../shared/auth.schema';
 import { sendSuccess } from '../../../shared/response';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const authRepository = new AuthRepository();
@@ -58,10 +58,10 @@ router.post('/logout', async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
-router.put('/change-password', requireAuth, async (req: any, res: Response, next: NextFunction) => {
+router.put('/change-password', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const input = changePasswordSchema.parse(req.body);
-    await changePasswordUseCase.execute(req.user.id, input);
+    await changePasswordUseCase.execute(req.user!.id, input);
     return sendSuccess(res, { message: 'Password changed successfully' });
   } catch (err) {
     next(err);
