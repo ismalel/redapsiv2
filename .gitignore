@@ -1,0 +1,55 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# AI Agents & Tools
+.gemini/
+.claude/
+.cursor/
+.aider/
+.openai/
+.copilot/
+.codeium/
+.tabnine/
+.continue/
+.supermaven/
+ai_logs/
+agent_outputs/
+
+# Development folders (common)
+node_modules/
+dist/
+build/
+out/
+.cache/
+.npm/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

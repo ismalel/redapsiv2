@@ -1,0 +1,250 @@
+Therapy Platform — Full System Migration & Rebuild Guide
+
+AI-Agent Oriented Specification (Plain Text)
+
+------------------------------------------------------------------------
+
+1. Purpose
+
+This document defines the complete technical and functional
+specification required to rebuild the Therapy Management Platform from
+scratch.
+
+It is designed to be: - Understandable by AI agents - Deterministic -
+Implementation-ready - Based on modern backend, web, and mobile
+architecture practices
+
+The system manages consultants and feminist psychologists providing
+therapy services.
+
+ALL USER-FACING TEXT IN WEB AND MOBILE APPLICATIONS MUST BE IN SPANISH.
+
+------------------------------------------------------------------------
+
+2. System Overview
+
+Architecture:
+
+Backend API → PostgreSQL (Dockerized) Web → React (Dockerized) Mobile →
+Kotlin Multiplatform Mobile (KMM)
+
+System Responsibilities: - User administration - Therapy lifecycle
+management - Secure communication - Event management - Session tracking
+
+------------------------------------------------------------------------
+
+3. User Roles
+
+Admin
+
+-   Crear usuarios
+-   Configurar plataforma
+-   Crear eventos
+-   Ver dashboard estadístico
+-   Supervisar terapias
+
+Psicólogo
+
+-   Crear terapias
+-   Invitar consultantes
+-   Administrar sesiones
+-   Chat con consultantes
+-   Gestionar perfil
+-   Seguimiento de objetivos
+
+Consultante
+
+-   Usar app móvil
+-   Buscar psicólogos
+-   Solicitar terapia
+-   Participar en sesiones
+-   Chat
+-   Inscribirse a eventos
+
+------------------------------------------------------------------------
+
+4. Core Domain Concepts
+
+User - id - nombre - email - password_hash - rol - foto_perfil -
+created_at - updated_at
+
+Therapy - id - psychologist_id - consultant_id - modalidad -
+costo_sesion - informacion_pago - notas - estado
+
+Therapy Session - id - therapy_id - fecha_programada - duracion -
+notas - media - completada
+
+Goals - id - therapy_id - titulo - descripcion - progreso - estado
+
+Messages - id - therapy_id - sender_id - mensaje - media - created_at
+
+Events - id - titulo - descripcion - ubicacion - fecha - recurrencia -
+costo - limite_participantes
+
+Event Registrations - id - event_id - consultant_id - estado
+
+------------------------------------------------------------------------
+
+5. Database Model (PostgreSQL)
+
+Tables: users therapies therapy_sessions goals messages events
+event_registrations
+
+------------------------------------------------------------------------
+
+6. ER Diagram
+
+users | | 1—n | therapies |—— therapy_sessions |—— goals |—— messages
+
+events | | 1—n | event_registrations
+
+------------------------------------------------------------------------
+
+7. Docker Infrastructure
+
+All services MUST run using Docker.
+
+Required containers:
+
+-   postgres
+-   backend-api
+-   web-app
+-   pgadmin (optional)
+-   redis (optional for cache/chat)
+
+docker-compose.yml MUST include: - network configuration - volumes for
+persistence - environment variables - healthchecks
+
+Example services: postgres → port 5432 backend → port 3000 web → port
+5173
+
+------------------------------------------------------------------------
+
+8. Backend (Express.js)
+
+Stack: - Node.js - Express - PostgreSQL - Prisma ORM
+
+Architecture: - Clean Architecture - Repository Pattern - Service Layer
+
+Required Features: - JWT Authentication - RBAC authorization -
+Validation - Logging - Error handling - Pagination - WebSocket Chat
+
+Security: - bcrypt hashing - HTTPS ready - Input validation
+
+------------------------------------------------------------------------
+
+9. Backend Execution Steps
+
+Step 1: docker compose up -d postgres
+
+Step 2: run database migrations
+
+Step 3: docker compose up backend
+
+Step 4: verify: http://localhost:3000/health
+
+------------------------------------------------------------------------
+
+10. Backend Tests
+
+Run tests:
+
+docker compose run backend npm test
+
+Tests required: - authentication - therapies - events - permissions -
+chat
+
+Coverage minimum: 80%
+
+Tools: - Jest - Supertest
+
+------------------------------------------------------------------------
+
+11. Web Application (React)
+
+Stack: - React - TypeScript - Vite - React Query - TailwindCSS
+
+UI REQUIREMENT: ALL TEXT MUST BE IN SPANISH.
+
+Examples: “Iniciar sesión” “Crear terapia” “Eventos” “Perfil”
+
+Features: - Dashboard Admin - Gestión de terapias - Gestión de eventos -
+Chat - Perfiles
+
+Run Web:
+
+docker compose up web
+
+Access: http://localhost:5173
+
+------------------------------------------------------------------------
+
+12. Web Tests
+
+Run:
+
+docker compose run web npm test
+
+Include: - component tests - routing tests - auth flow tests
+
+------------------------------------------------------------------------
+
+13. Mobile Application (KMM)
+
+Targets: Android + iOS
+
+Shared: - Networking - Models - Auth - Chat
+
+UI: Android → Jetpack Compose iOS → SwiftUI
+
+Language: SPANISH ONLY UI TEXT.
+
+------------------------------------------------------------------------
+
+14. Mobile Execution
+
+Android: open Android Studio run androidApp
+
+iOS: open Xcode run iosApp
+
+Shared tests: ./gradlew shared:test
+
+------------------------------------------------------------------------
+
+15. Recommended Improvements
+
+-   Push notifications
+-   Analytics dashboard
+-   Therapy progress graphs
+-   Audit logs
+-   Feature flags
+-   Offline support
+
+------------------------------------------------------------------------
+
+16. AI Agent Execution Order
+
+1.  Create PostgreSQL schema
+2.  Create Docker environment
+3.  Generate migrations
+4.  Implement authentication
+5.  Implement roles
+6.  Implement therapies
+7.  Implement chat
+8.  Implement events
+9.  Write tests
+10. Build React web
+11. Build KMM mobile
+
+Agent MUST follow: - SOLID - Clean Architecture - TDD
+
+------------------------------------------------------------------------
+
+17. Final Goal
+
+Deliver a scalable therapy ecosystem with: Admins Psicólogos
+Consultantes
+
+Unified backend and shared logic.
+
+END OF DOCUMENT.
