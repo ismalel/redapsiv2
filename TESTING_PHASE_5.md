@@ -18,14 +18,17 @@ Get a SCHEDULED session ID from `GET /sessions`.
 - [ ] Cannot complete a CANCELLED session → 422
 - [ ] Cannot cancel an already CANCELLED session → 422
 
-## 15. Session Notes & General Notes (API)
+## 15. Session Notes & Therapy Notes (API)
 
 - [ ] `POST /sessions/:id/notes` (as psychologist) with is_private=false → note visible to both psychologist and consultant
 - [ ] `POST /sessions/:id/notes` (as psychologist) with is_private=true → note NOT in consultant's `GET /sessions/:id/notes` response
 - [ ] `POST /sessions/:id/notes` (as consultant) with is_private=false → visible to psychologist
 - [ ] `PATCH /sessions/:id/notes/:noteId` — can only edit own notes (other's notes return 403)
 - [ ] `DELETE /sessions/:id/notes/:noteId` — can only delete own notes
-- [ ] `PATCH /therapies/:id` with `notes` field updates the general therapy notes (psychologist-only)
+- [ ] `POST /therapies/:id/notes` (as psychologist) creates a structured note with title and content
+- [ ] `GET /therapies/:id/notes` lists all private therapy notes
+- [ ] `PATCH /therapies/:id/notes/:noteId` updates a private note
+- [ ] `DELETE /therapies/:id/notes/:noteId` deletes a private note
 
 ## 16. Recurrence & Session Types (API)
 
@@ -41,10 +44,13 @@ Login as psy1@redapsi.app:
 - [ ] `/sesiones` shows global agenda with session types and status chips
 - [ ] Click a therapy in `/terapias` → Sesiones tab shows history + "Configurar Seguimiento" button
 - [ ] "Configurar Seguimiento" button → opens form → save → sessions appear in list + calendar blocked
-- [ ] "Sesión Extraordinaria" button exists (placeholder for now, opens scheduling logic)
+- [ ] "Sesión Extraordinaria" button exists (functional, opens proposition form)
 - [ ] Session Detail -> "Archivos" tab -> "Subir Archivo" button works (opens file picker + uploads)
 - [ ] Session Detail -> "Notas" tab -> "Nota Privada" toggle works
-- [ ] Therapy Detail -> "Notas Privadas" tab -> "Editar Notas Generales" works (Save/Cancel flow)
+- [ ] Therapy Detail -> "Notas Privadas" tab -> "Nueva Nota" button works
+- [ ] Therapy Detail -> "Notas Privadas" tab -> List shows notes with Title and Content
+- [ ] Therapy Detail -> "Notas Privadas" tab -> Edit and Delete buttons work
+- [ ] Therapy Detail -> "Notas Privadas" tab -> Search bar filters notes correctly
 
 ### Ownership Enforcement (Web):
 - [ ] Login as **ADMIN_PSYCHOLOGIST** (adminpsy@redapsi.app)

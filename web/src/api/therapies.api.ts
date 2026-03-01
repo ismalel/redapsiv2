@@ -21,6 +21,25 @@ export const therapiesApi = {
   update: async (id: string, data: any) => {
     const response = await apiClient.patch(`/therapies/${id}`, data);
     return response.data.data;
+  },
+
+  notes: {
+    list: async (therapyId: string) => {
+      const response = await apiClient.get(`/therapies/${therapyId}/notes`);
+      return response.data.data;
+    },
+    create: async (therapyId: string, data: { title: string; content: string }) => {
+      const response = await apiClient.post(`/therapies/${therapyId}/notes`, data);
+      return response.data.data;
+    },
+    update: async (therapyId: string, noteId: string, data: { title?: string; content?: string }) => {
+      const response = await apiClient.patch(`/therapies/${therapyId}/notes/${noteId}`, data);
+      return response.data.data;
+    },
+    delete: async (therapyId: string, noteId: string) => {
+      const response = await apiClient.delete(`/therapies/${therapyId}/notes/${noteId}`);
+      return response.data;
+    }
   }
 };
 

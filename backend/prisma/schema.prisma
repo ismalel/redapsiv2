@@ -152,6 +152,7 @@ model User {
   
   messages_sent             Message[]
   session_notes             SessionNote[]
+  therapy_notes             TherapyNote[]
   event_registrations       EventRegistration[]
   payments_registered       Payment[]        @relation("RegisteredBy")
   notifications             Notification[]
@@ -216,11 +217,12 @@ model Therapy {
   billing_plan     BillingPlan?
   recurrence_config RecurrenceConfiguration?
   sessions         TherapySession[]
-  session_requests SessionRequest[]
-  propositions     ScheduleProposition[]
-  goals            Goal[]
-  messages         Message[]
-}
+    session_requests  SessionRequest[]
+    propositions      ScheduleProposition[]
+    goals             Goal[]
+    therapy_notes     TherapyNote[]
+    messages          Message[]
+  }
 
 model BillingPlan {
   id              String      @id @default(uuid())
@@ -269,6 +271,19 @@ model SessionNote {
 
   session TherapySession @relation(fields: [session_id], references: [id])
   author  User           @relation(fields: [author_id], references: [id])
+}
+
+model TherapyNote {
+  id         String   @id @default(uuid())
+  therapy_id String
+  author_id  String
+  title      String
+  content    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  therapy Therapy @relation(fields: [therapy_id], references: [id])
+  author  User    @relation(fields: [author_id], references: [id])
 }
 
 model RecurrenceConfiguration {

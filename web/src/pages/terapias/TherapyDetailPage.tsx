@@ -6,6 +6,7 @@ import { useSessions } from '../../hooks/useSessions';
 import { useUpdateTherapy } from '../../hooks/useTherapies';
 import { RecurrenceConfigurationForm } from './RecurrenceConfigurationForm';
 import { ProposeSlotsForm } from './ProposeSlotsForm';
+import { TherapyNotesCRUD } from './TherapyNotesCRUD';
 import { queryKeys } from '../../utils/query-keys';
 import { Loader2, ArrowLeft, User, Calendar, DollarSign, MessageCircle, Clock, CheckCircle2, XCircle, RotateCcw, AlertCircle, ChevronRight, Edit2, Save, X, RefreshCw, Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -23,8 +24,6 @@ export const TherapyDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'sesiones' | 'notas' | 'objetivos'>('sesiones');
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
-  const [notesDraft, setNotesDraft] = useState('');
   const [showRecurrenceForm, setShowRecurrenceForm] = useState(false);
   const [showProposeForm, setShowProposeForm] = useState(false);
   const [proposalType, setProposalType] = useState<'INITIAL' | 'EXTRAORDINARY'>('INITIAL');
@@ -65,22 +64,6 @@ export const TherapyDetailPage: React.FC = () => {
 
   const isPsychologist = hasRole(user, 'PSYCHOLOGIST');
   const isAssignedPsychologist = isPsychologist && therapy?.psychologist_id === user?.id;
-
-  const handleStartEditingNotes = () => {
-    setNotesDraft(therapy.notes || '');
-    setIsEditingNotes(true);
-  };
-
-  const handleSaveNotes = () => {
-    updateTherapyMutation.mutate({ 
-      id: id!, 
-      data: { notes: notesDraft } 
-    }, {
-      onSuccess: () => {
-        setIsEditingNotes(false);
-      }
-    });
-  };
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-20">
@@ -279,60 +262,8 @@ export const TherapyDetailPage: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'notas' && isPsychologist && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest mb-4">Notas de la Terapia</h3>
-              
-              {isEditingNotes ? (
-                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <textarea 
-                    value={notesDraft}
-                    onChange={(e) => setNotesDraft(e.target.value)}
-                    placeholder="Escribe las notas generales para esta terapia..."
-                    className="w-full bg-slate-50 border-2 border-brand-purple/20 rounded-[2rem] p-8 text-slate-600 leading-relaxed min-h-[250px] focus:ring-brand-purple focus:border-brand-purple outline-none transition-all"
-                  />
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={handleSaveNotes}
-                      disabled={updateTherapyMutation.isPending}
-                      className="flex-1 py-4 bg-brand-purple text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-purple-dark transition-all shadow-lg shadow-brand-purple/20 flex items-center justify-center disabled:opacity-50"
-                    >
-                      {updateTherapyMutation.isPending ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <>
-                          <Save size={16} className="mr-2" />
-                          Guardar Cambios
-                        </>
-                      )}
-                    </button>
-                    <button 
-                      onClick={() => setIsEditingNotes(false)}
-                      className="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 min-h-[150px]">
-                    {therapy.notes ? (
-                      <p className="text-slate-600 whitespace-pre-wrap leading-relaxed">{therapy.notes}</p>
-                    ) : (
-                      <p className="text-slate-400 italic">No hay notas generales registradas para esta terapia.</p>
-                    )}
-                  </div>
-                  <button 
-                    onClick={handleStartEditingNotes}
-                    className="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center"
-                  >
-                    <Edit2 size={16} className="mr-2" />
-                    Editar Notas Generales
-                  </button>
-                </>
-              )}
-            </div>
+          {activeTab === 'notas' && isAssignedPsychologist && (
+            <TherapyNotesCRUD therapyId={id!} />
           )}
 
           {activeTab === 'objetivos' && (

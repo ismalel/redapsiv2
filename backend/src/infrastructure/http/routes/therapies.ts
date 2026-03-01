@@ -11,6 +11,7 @@ import { Role, BillingType, TherapyStatus } from '@prisma/client';
 import { z } from 'zod';
 import { propositionsNestedRouter } from './propositions';
 import { sessionRequestsNestedRouter } from './session-requests';
+import { therapyNotesRouter } from './therapy-notes';
 
 const router = Router();
 
@@ -103,6 +104,7 @@ router.post('/:id/recurrence', requireAuth, requireRole(Role.PSYCHOLOGIST), asyn
 // Nest sub-resources under /therapies/:id
 router.use('/:id/propositions', propositionsNestedRouter);
 router.use('/:id/session-requests', sessionRequestsNestedRouter);
+router.use('/:id/notes', therapyNotesRouter);
 
 export default router;
 export { router as therapiesRouter };
