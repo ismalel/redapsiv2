@@ -930,6 +930,390 @@
 			]
 		},
 		{
+			"name": "Sessions",
+			"item": [
+				{
+					"name": "List Sessions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions?page=1&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "20"
+								},
+								{
+									"key": "therapy_id",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "SCHEDULED",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Session Fee",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"session_fee\": 450\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"complete"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reason\": \"Consultante no asistió\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Postpone Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"new_date\": \"2026-03-05T15:00:00Z\",\n    \"reason\": \"Necesito reajustar agenda\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/postpone",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"postpone"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Postpone",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/confirm-postpone",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"confirm-postpone"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Attach Media",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"media_url\": \"/uploads/sessions/test.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/media",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"media"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Session Notes",
+			"item": [
+				{
+					"name": "List Session Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"notes"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Session Note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Nota de prueba para la sesión\",\n    \"is_private\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/notes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"notes"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Session Note",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Nota actualizada\",\n    \"is_private\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/notes/:noteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"notes",
+								":noteId"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								},
+								{
+									"key": "noteId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Session Note",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/:id/notes/:noteId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								":id",
+								"notes",
+								":noteId"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								},
+								{
+									"key": "noteId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Upload",
 			"item": [
 				{

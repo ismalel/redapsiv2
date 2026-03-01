@@ -55,6 +55,7 @@ export class SelectPropositionSlotUseCase {
           scheduled_at: selectedSlot,
           duration: 60, // Default duration as per schema requirement or business rule
           status: SessionStatus.SCHEDULED,
+          type: proposition.type,
           session_fee: proposition.therapy.billing_plan?.default_fee,
         },
       });

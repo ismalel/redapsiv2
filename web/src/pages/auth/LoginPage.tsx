@@ -22,10 +22,23 @@ export const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
+
+  const debugUsers = [
+    { label: 'ADMIN', email: 'admin@redapsi.app', pass: 'Admin1234!' },
+    { label: 'ADMIN_PSY', email: 'adminpsy@redapsi.app', pass: 'Admin1234!' },
+    { label: 'PSY 1', email: 'psy1@redapsi.app', pass: 'Psych1234!' },
+    { label: 'PSY 2', email: 'psy2@redapsi.app', pass: 'Psych1234!' },
+  ];
+
+  const fillForm = (email: string, pass: string) => {
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', pass, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: LoginForm) => {
     setIsSubmitting(true);
@@ -130,6 +143,22 @@ export const LoginPage: React.FC = () => {
             )}
           </button>
         </form>
+
+        <div className="mt-8 pt-6 border-t border-slate-100">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center mb-4">Debug Access (Remove later)</p>
+          <div className="grid grid-cols-2 gap-2">
+            {debugUsers.map((u) => (
+              <button
+                key={u.label}
+                type="button"
+                onClick={() => fillForm(u.email, u.pass)}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-purple hover:text-white hover:border-brand-purple transition-all"
+              >
+                {u.label}
+              </button>
+            ))}
+          </div>
+        </div>
         
         <footer className="mt-8 text-center border-t border-slate-100 pt-6">
           <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.25em] leading-relaxed">

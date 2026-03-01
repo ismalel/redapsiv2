@@ -1,4 +1,4 @@
-import { ScheduleProposition, PropositionStatus, NotificationType, AvailabilityType } from '@prisma/client';
+import { ScheduleProposition, PropositionStatus, NotificationType, AvailabilityType, SessionType } from '@prisma/client';
 import { prisma } from '../../infrastructure/database/prismaClient';
 import { ApiError } from '../../shared/apiError';
 import { NotificationService } from '../notifications/NotificationService';
@@ -6,6 +6,7 @@ import { NotificationService } from '../notifications/NotificationService';
 export interface CreatePropositionInput {
   therapy_id: string;
   proposed_slots: Date[];
+  type?: SessionType;
 }
 
 export class CreatePropositionUseCase {
@@ -65,6 +66,7 @@ export class CreatePropositionUseCase {
         therapy_id: input.therapy_id,
         proposed_slots: input.proposed_slots,
         status: PropositionStatus.PENDING,
+        type: input.type || SessionType.INITIAL,
       },
     });
 

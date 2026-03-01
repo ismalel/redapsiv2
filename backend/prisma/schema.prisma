@@ -37,6 +37,12 @@ enum SessionStatus {
   POSTPONED
 }
 
+enum SessionType {
+  INITIAL
+  RECURRENT
+  EXTRAORDINARY
+}
+
 enum TherapyRequestStatus {
   PENDING
   ACCEPTED
@@ -208,6 +214,7 @@ model Therapy {
   consultant   User @relation("ConsultantTherapies",   fields: [consultant_id],   references: [id])
   
   billing_plan     BillingPlan?
+  recurrence_config RecurrenceConfiguration?
   sessions         TherapySession[]
   session_requests SessionRequest[]
   propositions     ScheduleProposition[]
@@ -236,6 +243,7 @@ model TherapySession {
   scheduled_at  DateTime
   duration      Int           @default(60)
   status        SessionStatus @default(SCHEDULED)
+  type          SessionType   @default(INITIAL)
   session_fee   Decimal?      @db.Decimal(10, 2)
   cancelled_by  String?
   cancel_reason String?
@@ -261,6 +269,23 @@ model SessionNote {
 
   session TherapySession @relation(fields: [session_id], references: [id])
   author  User           @relation(fields: [author_id], references: [id])
+}
+
+model RecurrenceConfiguration {
+  id              String   @id @default(uuid())
+  therapy_id      String   @unique
+  day_of_week     Int      // 0-6
+  start_time      String   // HH:mm
+  duration        Int      @default(60)
+  frequency       String   @default("WEEKLY")
+  sessions_count  Int?     // null for indefinite
+  start_date      DateTime
+  end_date        DateTime?
+  status          TherapyStatus @default(ACTIVE)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  therapy Therapy @relation(fields: [therapy_id], references: [id])
 }
 
 model AvailabilitySlot {
@@ -293,6 +318,7 @@ model SessionRequest {
   proposed_at   DateTime
   notes         String?
   status        SessionRequestStatus @default(PENDING)
+  type          SessionType          @default(INITIAL)
   created_at    DateTime             @default(now())
 
   therapy    Therapy @relation(fields: [therapy_id], references: [id])
@@ -305,6 +331,7 @@ model ScheduleProposition {
   proposed_slots DateTime[]
   selected_slot  DateTime?
   status         PropositionStatus @default(PENDING)
+  type           SessionType       @default(INITIAL)
   created_at     DateTime          @default(now())
 
   therapy Therapy         @relation(fields: [therapy_id], references: [id])

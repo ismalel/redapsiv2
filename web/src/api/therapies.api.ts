@@ -16,6 +16,11 @@ export const therapiesApi = {
   create: async (data: any) => {
     const response = await apiClient.post('/therapies', data);
     return response.data.data;
+  },
+
+  update: async (id: string, data: any) => {
+    const response = await apiClient.patch(`/therapies/${id}`, data);
+    return response.data.data;
   }
 };
 

@@ -16,6 +16,7 @@ export class GetTherapyUseCase implements IGetTherapyUseCase {
           select: { id: true, name: true, email: true, avatar_url: true }
         },
         billing_plan: true,
+        recurrence_config: true,
       },
     });
 

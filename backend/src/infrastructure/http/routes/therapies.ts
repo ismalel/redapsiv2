@@ -3,6 +3,7 @@ import { CreateTherapyUseCase } from '../../../application/therapies/CreateThera
 import { GetTherapyUseCase } from '../../../application/therapies/GetTherapyUseCase';
 import { UpdateTherapyUseCase } from '../../../application/therapies/UpdateTherapyUseCase';
 import { ListTherapiesUseCase } from '../../../application/therapies/ListTherapiesUseCase';
+import { CreateRecurrenceUseCase } from '../../../application/therapies/CreateRecurrenceUseCase';
 import { sendSuccess, sendPaginated } from '../../../shared/response';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
@@ -17,6 +18,7 @@ const createTherapyUseCase = new CreateTherapyUseCase();
 const getTherapyUseCase = new GetTherapyUseCase();
 const updateTherapyUseCase = new UpdateTherapyUseCase();
 const listTherapiesUseCase = new ListTherapiesUseCase();
+const createRecurrenceUseCase = new CreateRecurrenceUseCase();
 
 const createTherapySchema = z.object({
   consultant_email: z.string().email(),
@@ -28,6 +30,15 @@ const createTherapySchema = z.object({
     default_fee: z.number().min(0),
     recurrence: z.string().optional(),
   }),
+});
+
+const recurrenceSchema = z.object({
+  day_of_week: z.number().min(0).max(6),
+  start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  duration: z.number().min(15),
+  frequency: z.enum(['WEEKLY', 'BIWEEKLY']),
+  sessions_count: z.number().optional(),
+  start_date: z.string().datetime(),
 });
 
 const updateTherapySchema = z.object({
@@ -71,6 +82,19 @@ router.patch('/:id', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: Au
     const input = updateTherapySchema.parse(req.body);
     const result = await updateTherapyUseCase.execute(req.params.id, req.user!.id, input);
     return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/recurrence', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const input = recurrenceSchema.parse(req.body);
+    const result = await createRecurrenceUseCase.execute(req.user!.id, {
+      ...input,
+      therapy_id: req.params.id
+    });
+    return sendSuccess(res, result, 201);
   } catch (err) {
     next(err);
   }
