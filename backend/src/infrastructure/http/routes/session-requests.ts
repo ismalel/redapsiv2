@@ -5,7 +5,7 @@ import { ListSessionRequestsUseCase } from '../../../application/session-request
 import { sendSuccess } from '../../../shared/response';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
-import { Role } from '@prisma/client';
+import { Role, SessionType } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../database/prismaClient';
 import { hasRole } from '../../../shared/hasRole';
@@ -21,6 +21,7 @@ const listSessionRequestsUseCase = new ListSessionRequestsUseCase();
 const createSessionRequestSchema = z.object({
   proposed_at: z.coerce.date(),
   notes: z.string().optional(),
+  type: z.nativeEnum(SessionType).optional(),
 });
 
 const respondSessionRequestSchema = z.object({
@@ -51,11 +52,12 @@ nestedRouter.get('/', requireAuth, async (req: AuthRequest, res: Response, next:
 // POST /therapies/:id/session-requests (Consultant only)
 nestedRouter.post('/', requireAuth, requireRole(Role.CONSULTANT), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { proposed_at, notes } = createSessionRequestSchema.parse(req.body);
+    const { proposed_at, notes, type } = createSessionRequestSchema.parse(req.body);
     const result = await createSessionRequestUseCase.execute(req.user!.id, {
       therapy_id: req.params.id,
       proposed_at,
-      notes
+      notes,
+      type
     });
     return sendSuccess(res, result, 201);
   } catch (err) {

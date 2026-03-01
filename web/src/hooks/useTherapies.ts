@@ -22,6 +22,17 @@ export const useCreateTherapy = () => {
   });
 };
 
+export const useUpdateTherapy = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => therapiesApi.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapies.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.therapies.all() });
+    },
+  });
+};
+
 export const useTherapyRequests = () => {
   return useQuery({
     queryKey: queryKeys.therapies.requests,

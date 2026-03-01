@@ -1,4 +1,4 @@
-import { SessionRequest, SessionRequestStatus, AvailabilityType, NotificationType } from '@prisma/client';
+import { SessionRequest, SessionRequestStatus, AvailabilityType, NotificationType, SessionType } from '@prisma/client';
 import { prisma } from '../../infrastructure/database/prismaClient';
 import { ApiError } from '../../shared/apiError';
 import { NotificationService } from '../notifications/NotificationService';
@@ -7,6 +7,7 @@ export interface CreateSessionRequestInput {
   therapy_id: string;
   proposed_at: Date;
   notes?: string;
+  type?: SessionType;
 }
 
 export class CreateSessionRequestUseCase {
@@ -61,6 +62,7 @@ export class CreateSessionRequestUseCase {
         proposed_at: input.proposed_at,
         notes: input.notes,
         status: SessionRequestStatus.PENDING,
+        type: input.type || SessionType.INITIAL,
       },
     });
 

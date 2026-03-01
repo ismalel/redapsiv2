@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, User as UserIcon, LogOut, Users, Inbox } from 'lucide-react';
+import { LayoutDashboard, User as UserIcon, LogOut, Users, Inbox, Calendar as CalendarIcon } from 'lucide-react';
 import { hasRole } from '../../utils/role-permissions';
 
 export const AppShell: React.FC = () => {
@@ -14,6 +14,7 @@ export const AppShell: React.FC = () => {
     if (path.includes('/perfil')) return 'Mi Perfil';
     if (path.includes('/terapias/nueva')) return 'Nueva Terapia';
     if (path.includes('/terapias')) return 'Mis Terapias';
+    if (path.includes('/sesiones')) return 'Agenda de Sesiones';
     if (path.includes('/solicitudes')) return 'Solicitudes';
     if (path.includes('/cambiar-contrasena')) return 'Cambiar Contraseña';
     return 'REDAPSI';
@@ -46,17 +47,31 @@ export const AppShell: React.FC = () => {
           </NavLink>
 
           {(hasRole(user, 'PSYCHOLOGIST') || hasRole(user, 'ADMIN')) && (
-            <NavLink 
-              to="/terapias" 
-              className={({ isActive }) => 
-                `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
-                  isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`
-              }
-            >
-              <Users size={20} />
-              <span>Mis Terapias</span>
-            </NavLink>
+            <>
+              <NavLink 
+                to="/terapias" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <Users size={20} />
+                <span>Mis Terapias</span>
+              </NavLink>
+
+              <NavLink 
+                to="/sesiones" 
+                className={({ isActive }) => 
+                  `flex items-center space-x-3 px-5 py-4 rounded-2xl transition-all duration-300 font-bold text-sm tracking-wide ${
+                    isActive ? 'bg-white text-brand-purple shadow-xl shadow-black/10' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  }`
+                }
+              >
+                <CalendarIcon size={20} />
+                <span>Sesiones</span>
+              </NavLink>
+            </>
           )}
 
           {hasRole(user, 'PSYCHOLOGIST') && (

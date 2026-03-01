@@ -5,7 +5,7 @@ import { ListPropositionsUseCase } from '../../../application/propositions/ListP
 import { sendSuccess } from '../../../shared/response';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
-import { Role } from '@prisma/client';
+import { Role, SessionType } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../database/prismaClient';
 import { hasRole } from '../../../shared/hasRole';
@@ -20,6 +20,7 @@ const selectPropositionSlotUseCase = new SelectPropositionSlotUseCase();
 
 const createPropositionSchema = z.object({
   proposed_slots: z.array(z.coerce.date()).min(1),
+  type: z.nativeEnum(SessionType).optional(),
 });
 
 const selectSlotSchema = z.object({
@@ -50,10 +51,11 @@ nestedRouter.get('/', requireAuth, async (req: AuthRequest, res: Response, next:
 // POST /therapies/:id/propositions (Psychologist only)
 nestedRouter.post('/', requireAuth, requireRole(Role.PSYCHOLOGIST), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { proposed_slots } = createPropositionSchema.parse(req.body);
+    const { proposed_slots, type } = createPropositionSchema.parse(req.body);
     const result = await createPropositionUseCase.execute(req.user!.id, {
       therapy_id: req.params.id,
-      proposed_slots
+      proposed_slots,
+      type
     });
     return sendSuccess(res, result, 201);
   } catch (err) {

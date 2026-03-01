@@ -13,6 +13,7 @@ import { therapyRequestsRouter } from './routes/therapy-requests';
 import { notificationsRouter } from './routes/notifications';
 import { propositionsRouter } from './routes/propositions';
 import { sessionRequestsRouter } from './routes/session-requests';
+import { sessionsRouter } from './routes/sessions';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/therapy-requests', therapyRequestsRouter);
 app.use('/notifications', notificationsRouter);
 app.use('/propositions', propositionsRouter);
 app.use('/session-requests', sessionRequestsRouter);
+app.use('/sessions', sessionsRouter);
 
 // Global Error Handler
 app.use(errorHandler);

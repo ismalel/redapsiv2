@@ -20,4 +20,9 @@ export const queryKeys = {
     detail: (id: string) => ['therapy', id] as const,
     requests: ['therapy-requests'] as const,
   },
+  sessions: {
+    all: (filters?: object) => ['sessions', filters] as const,
+    detail: (id: string) => ['session', id] as const,
+    notes: (sessionId: string) => ['session', sessionId, 'notes'] as const,
+  },
 };

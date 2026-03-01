@@ -14,6 +14,8 @@ import { TerapiasListPage } from './pages/terapias/TerapiasListPage';
 import { TherapyRequestsPage } from './pages/terapias/TherapyRequestsPage';
 import { CreateTherapyPage } from './pages/terapias/CreateTherapyPage';
 import { TherapyDetailPage } from './pages/terapias/TherapyDetailPage';
+import { SesionesListPage } from './pages/sesiones/SesionesListPage';
+import { SessionDetailPage } from './pages/sesiones/SessionDetailPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +83,18 @@ function App() {
               <Route path="terapias/:id" element={
                 <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST', 'ADMIN']}>
                   <TherapyDetailPage />
+                </RoleGuard>
+              } />
+
+              <Route path="sesiones" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST', 'ADMIN']}>
+                  <SesionesListPage />
+                </RoleGuard>
+              } />
+
+              <Route path="sesiones/:id" element={
+                <RoleGuard allowedRoles={['PSYCHOLOGIST', 'ADMIN_PSYCHOLOGIST', 'ADMIN']}>
+                  <SessionDetailPage />
                 </RoleGuard>
               } />
 
