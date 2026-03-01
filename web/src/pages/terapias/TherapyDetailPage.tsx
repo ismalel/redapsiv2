@@ -5,6 +5,7 @@ import { therapiesApi } from '../../api/therapies.api';
 import { useSessions } from '../../hooks/useSessions';
 import { useUpdateTherapy } from '../../hooks/useTherapies';
 import { RecurrenceConfigurationForm } from './RecurrenceConfigurationForm';
+import { ProposeSlotsForm } from './ProposeSlotsForm';
 import { queryKeys } from '../../utils/query-keys';
 import { Loader2, ArrowLeft, User, Calendar, DollarSign, MessageCircle, Clock, CheckCircle2, XCircle, RotateCcw, AlertCircle, ChevronRight, Edit2, Save, X, RefreshCw, Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -25,6 +26,8 @@ export const TherapyDetailPage: React.FC = () => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesDraft, setNotesDraft] = useState('');
   const [showRecurrenceForm, setShowRecurrenceForm] = useState(false);
+  const [showProposeForm, setShowProposeForm] = useState(false);
+  const [proposalType, setProposalType] = useState<'INITIAL' | 'EXTRAORDINARY'>('INITIAL');
 
   const { data: therapy, isLoading: isLoadingTherapy, isError } = useQuery({
     queryKey: queryKeys.therapies.detail(id!),
@@ -180,19 +183,34 @@ export const TherapyDetailPage: React.FC = () => {
             <div className="space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest">Gestión de Sesiones</h3>
-                {isAssignedPsychologist && !showRecurrenceForm && (
+                {isAssignedPsychologist && !showRecurrenceForm && !showProposeForm && (
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => setShowRecurrenceForm(true)}
-                      className="px-4 py-2 bg-brand-purple/10 text-brand-purple rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-purple hover:text-white transition-all flex items-center"
-                    >
-                      <RefreshCw size={14} className="mr-2" />
-                      Configurar Seguimiento
-                    </button>
-                    <button className="px-4 py-2 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center">
-                      <Plus size={14} className="mr-2" />
-                      Sesión Extraordinaria
-                    </button>
+                    {sessions.length === 0 ? (
+                      <button 
+                        onClick={() => { setProposalType('INITIAL'); setShowProposeForm(true); }}
+                        className="px-4 py-2 bg-brand-cyan text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-cyan-dark transition-all flex items-center shadow-lg shadow-brand-cyan/20"
+                      >
+                        <Calendar size={14} className="mr-2" />
+                        Agendar Sesión Inicial
+                      </button>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={() => setShowRecurrenceForm(true)}
+                          className="px-4 py-2 bg-brand-purple/10 text-brand-purple rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-purple hover:text-white transition-all flex items-center"
+                        >
+                          <RefreshCw size={14} className="mr-2" />
+                          Configurar Seguimiento
+                        </button>
+                        <button 
+                          onClick={() => { setProposalType('EXTRAORDINARY'); setShowProposeForm(true); }}
+                          className="px-4 py-2 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center"
+                        >
+                          <Plus size={14} className="mr-2" />
+                          Sesión Extraordinaria
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -203,6 +221,15 @@ export const TherapyDetailPage: React.FC = () => {
                   onSuccess={() => setShowRecurrenceForm(false)}
                   onCancel={() => setShowRecurrenceForm(false)}
                   initialData={therapy.recurrence_config}
+                />
+              )}
+
+              {showProposeForm && (
+                <ProposeSlotsForm 
+                  therapyId={id!}
+                  sessionType={proposalType}
+                  onSuccess={() => setShowProposeForm(false)}
+                  onCancel={() => setShowProposeForm(false)}
                 />
               )}
 
